@@ -1,0 +1,17 @@
+{
+  "task": {
+    "schemaVersion": 1,
+    "title": "Thay bằng tên tác vụ",
+    "goal": "Thay bằng mục tiêu người dùng đã xác nhận",
+    "project": "Tên dự án",
+    "mode": "design-and-build",
+    "scope": "screen",
+    "decisions": [],
+    "direction": { "source": "unresolved", "summary": "", "evidence": "" },
+    "acceptanceCriteria": [],
+    "artifacts": [],
+    "checks": [],
+    "findings": [],
+    "limitations": []
+  }
+}

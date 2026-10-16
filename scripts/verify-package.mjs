@@ -56,7 +56,7 @@ try {
     } throw new Error(child.output || 'Server startup timeout');
   };
   let server = start(port, dataDir);
-  const status = await waitReady(server); assert.equal(status.version, metadata.version); assert.equal(status.workflowVersion, '1.2.0');
+  const status = await waitReady(server); assert.equal(status.version, metadata.version); assert.equal(status.workflowVersion, '1.3.0');
   assert.equal(status.stdio.command, process.execPath); assert.deepEqual(status.stdio.args, [join(root, 'runtime/stdio.js')]);
   assert.equal(resolve(status.dataFile).toLowerCase(), resolve(dataDir, 'studio.json').toLowerCase());
   const html = await (await fetch(base)).text(); assert.match(html, /<div id="root">/);
@@ -69,11 +69,11 @@ try {
   pass('packaged editor + static assets + compatible reuse + different-store conflict');
   client = new Client({ name: 'package-smoke', version: '1.0.0' });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [cli, 'mcp', '--port', String(port)], cwd: temp, env }));
-  assert.equal((await client.listTools()).tools.length, 11);
+  assert.equal((await client.listTools()).tools.length, 17);
   const advertised = new Client({ name: 'advertised-desktop-config', version: '1.0.0' });
   try {
     await advertised.connect(new StdioClientTransport({ command: status.stdio.command, args: status.stdio.args, cwd: temp, env: { ...env, STUDIO_MCP_URL: `${base}/mcp` } }));
-    assert.equal((await advertised.listTools()).tools.length, 11);
+    assert.equal((await advertised.listTools()).tools.length, 17);
   } finally { await advertised.close(); }
   const call = async (name, args) => {
     const response = await client.callTool({ name, arguments: args }); assert.ok(!response.isError, JSON.stringify(response)); return JSON.parse(response.content[0].text);
@@ -83,14 +83,19 @@ try {
   const before = await call('get_system', { systemId: created.id });
   await call('update_tokens', { systemId: created.id, expectedRevision: before.revision, patch: { settings: { radius: 17 } } });
   const saved = await (await fetch(`${base}/api/state`)).json(); assert.equal(saved.systems.find(s => s.id === created.id).settings.radius, 17);
+  const task = await call('create_task', { task: { title: 'Package grill fixture', goal: 'Specify schedule rules', project: 'Package verification', mode: 'grill-me', acceptanceCriteria: ['Rules specified'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Specification', path: '.token-studio/tasks/package/SPEC.md' }] } });
+  assert.equal((await call('validate_task', { taskId: task.id })).valid, true);
+  const completedTask = await call('complete_task', { taskId: task.id, expectedRevision: task.revision }); assert.equal(completedTask.status, 'completed');
+  assert.equal((await (await fetch(`${base}/api/state`)).json()).revision, saved.revision);
   await client.close(); client = null;
-  pass('real packaged stdio → HTTP MCP: 11 tools, workflow and persisted token writes');
+  pass('real packaged stdio → HTTP MCP: 17 tools, workflow and persisted token writes');
   const bytes = readFileSync(join(dataDir, 'studio.json'));
   const second = run(['--no-open', '--port', '14379', '--data-dir', dataDir]);
   assert.equal(second.status, 1); assert.deepEqual(readFileSync(join(dataDir, 'studio.json')), bytes);
   pass('cross-port writer lock refuses a second server without data changes');
   await stop(server);
   server = start(port, dataDir); await waitReady(server);
+  assert.equal((await (await fetch(`${base}/api/tasks/${task.id}`)).json()).status, 'completed');
   assert.deepEqual((await (await fetch(`${base}/api/state`)).json()).systems, saved.systems);
   pass('restart/crash-stale-lock recovery preserves systems and history');
   const migrationDir = join(temp, 'migrated');
@@ -105,6 +110,8 @@ try {
   assert.equal(existsSync(join(temp, 'invalid-history/studio.json')), false);
   pass('migration validates, copies, preserves source and refuses overwrite');
   writeFileSync(join(home, 'config.toml'), 'model = "gpt-6.1-sol"\n\n[mcp_servers.keep_me]\ncommand = "node"\nargs = ["--version"]\n');
+  if (process.env.STUDIO_SKIP_CODEX_SETUP === '1') console.log('SKIP actual Codex setup: not installed on this CI runner; transaction tests still run.');
+  else {
   const setup = run(['setup', 'codex', '--port', String(port)]); assert.equal(setup.status, 0, setup.stderr);
   const config = readFileSync(join(home, 'config.toml'), 'utf8'); assert.match(config, /keep_me/); assert.match(config, /14378\/mcp/);
   assert.ok(existsSync(join(home, 'skills/token-studio-shadcn/references/design-quality.md')));
@@ -114,6 +121,7 @@ try {
   assert.equal(run(['setup', 'codex', '--port', '14379', '--replace-mcp']).status, 0);
   assert.ok(readdirSync(home).some(file => file.endsWith('.bak')));
   pass('actual Codex CLI setup in isolated home: backup, preservation, repeat, conflict and explicit replace');
+  }
   extraServer = createServer((_req, res) => { res.writeHead(200, { 'Content-Type': 'application/json' }); res.end('{"application":"other"}'); });
   extraServer.listen(14380, '127.0.0.1'); await once(extraServer, 'listening');
   assert.equal(run(['--no-open', '--port', '14380', '--data-dir', join(temp, 'collision')]).status, 1);

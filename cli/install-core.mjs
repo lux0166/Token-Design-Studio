@@ -35,6 +35,7 @@ export function planInstallation({ home, source, version, client = 'codex' }) {
   const manifestPath = join(target, '.token-design-studio.json');
   checkPath(target, '.token-design-studio.json');
   const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : { hashes: {} };
+  if (previous.client && previous.client !== client) throw new Error(`Thư mục này thuộc client ${previous.client}; chọn đúng --home cho ${client}. Chưa ghi thay đổi.`);
   const names = [];
   const walk = (dir, prefix = '') => { for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const name = prefix + entry.name;

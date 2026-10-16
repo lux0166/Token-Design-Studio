@@ -16,3 +16,8 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run pack:local
+      - run: npm run test:package
+        env:
+          STUDIO_SKIP_CODEX_SETUP: '1'
+      - run: npm run pack:skill
+      - run: npm run test:skill-package

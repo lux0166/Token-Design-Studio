@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "default": 1,
+      "type": "number",
+      "const": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "goal": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 6000
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "mode": {
+      "default": "design-and-build",
+      "type": "string",
+      "enum": [
+        "design-and-build",
+        "replicate",
+        "refine",
+        "grill-me"
+      ]
+    },
+    "scope": {
+      "default": "screen",
+      "type": "string",
+      "enum": [
+        "screen",
+        "token-only"
+      ]
+    },
+    "decisions": {
+      "default": [],
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "answer": {
+            "default": "",
+            "type": "string",
+            "maxLength": 12000
+          },
+          "material": {
+            "default": true,
+            "type": "boolean"
+          },
+          "status": {
+            "default": "open",
+            "type": "string",
+            "enum": [
+              "open",
+              "conflicting",
+              "resolved"
+            ]
+          },
+          "source": {
+            "default": "unresolved",
+            "type": "string",
+            "enum": [
+              "human",
+              "project",
+              "reference",
+              "delegated",
+              "unresolved"
+            ]
+          },
+          "evidence": {
+            "default": "",
+            "type": "string",
+            "maxLength": 12000
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "answer",
+          "material",
+          "status",
+          "source",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "direction": {
+      "default": {
+        "source": "unresolved",
+        "summary": "",
+        "evidence": ""
+      },
+      "type": "object",
+      "properties": {
+        "source": {
+          "default": "unresolved",
+          "type": "string",
+          "enum": [
+            "human",
+            "project",
+            "reference",
+            "delegated",
+            "unresolved"
+          ]
+        },
+        "summary": {
+          "default": "",
+          "type": "string",
+          "maxLength": 12000
+        },
+        "evidence": {
+          "default": "",
+          "type": "string",
+          "maxLength": 12000
+        }
+      },
+      "required": [
+        "source",
+        "summary",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "acceptanceCriteria": {
+      "default": [],
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 6000
+      }
+    },
+    "artifacts": {
+      "default": [],
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "spec",
+              "design",
+              "review",
+              "handoff",
+              "reference",
+              "render",
+              "test",
+              "change"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "viewport": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20000
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20000
+              }
+            },
+            "required": [
+              "width",
+              "height"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "path",
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "checks": {
+      "default": [],
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "before-code",
+              "primary-flow",
+              "after-render",
+              "contrast",
+              "affected",
+              "acceptance"
+            ]
+          },
+          "status": {
+            "default": "pending",
+            "type": "string",
+            "enum": [
+              "pending",
+              "passed",
+              "failed",
+              "blocked"
+            ]
+          },
+          "required": {
+            "default": true,
+            "type": "boolean"
+          },
+          "evidence": {
+            "default": "",
+            "type": "string",
+            "maxLength": 12000
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "kind",
+          "status",
+          "required",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "findings": {
+      "default": [],
+      "maxItems": 100,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "observation": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "impact": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "blocker",
+              "major",
+              "minor"
+            ]
+          },
+          "status": {
+            "default": "open",
+            "type": "string",
+            "enum": [
+              "open",
+              "fixed",
+              "deferred",
+              "out-of-scope"
+            ]
+          },
+          "repair": {
+            "default": "",
+            "type": "string",
+            "maxLength": 12000
+          },
+          "recheck": {
+            "default": "",
+            "type": "string",
+            "maxLength": 12000
+          }
+        },
+        "required": [
+          "id",
+          "location",
+          "observation",
+          "evidence",
+          "impact",
+          "severity",
+          "status",
+          "repair",
+          "recheck"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "limitations": {
+      "default": [],
+      "maxItems": 50,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "blocking": {
+            "default": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "message",
+          "blocking"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "title",
+    "goal",
+    "project",
+    "mode",
+    "scope",
+    "decisions",
+    "direction",
+    "acceptanceCriteria",
+    "artifacts",
+    "checks",
+    "findings",
+    "limitations"
+  ],
+  "additionalProperties": false
+}

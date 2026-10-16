@@ -39,6 +39,6 @@ export function WorkflowPanel() {
     </div>
     {error && <p role="alert" className="error-message">{error}</p>}
     <details className="workflow-details"><summary><BookOpen /> Đọc toàn bộ hướng dẫn agent</summary>{guide ? <pre>{fullGuide}</pre> : <p>{error || 'Đang tải hướng dẫn…'}</p>}</details>
-    <p className="workflow-note">MCP cung cấp <code>get_workflow</code>, prompt <code>grill_me</code> và <code>design_and_ship</code>. Sao chép yêu cầu sang Codex, Claude hoặc client MCP để bắt đầu. Token Studio cung cấp hướng dẫn và mẫu đặc tả; editor chưa tự vận hành cuộc phỏng vấn AI hay cưỡng chế mọi client tuân thủ.</p>
+    <p className="workflow-note">Dùng <code>get_workflow</code>, <code>grill_me</code> hoặc <code>design_and_ship</code> trong client AI. Hồ sơ tác vụ ghi lại quyết định và bằng chứng; Studio chỉ cho đánh dấu hoàn tất khi đủ điều kiện. File vẫn nằm trong dự án. Studio không tự phỏng vấn, đọc ảnh hoặc xác thực chất lượng thiết kế.</p>
   </section>;
 }

@@ -8,9 +8,10 @@ const interviewGuide = readFileSync(new URL('references/interview.md', skillDire
 const reuseGuide = readFileSync(new URL('references/reuse.md', skillDirectory), 'utf8');
 const designQualityGuide = readFileSync(new URL('references/design-quality.md', skillDirectory), 'utf8');
 const handoffTemplate = readFileSync(new URL('references/handoff.md', skillDirectory), 'utf8');
+const taskGuide = readFileSync(new URL('references/tasks.md', skillDirectory), 'utf8');
 export function getWorkflow(mode: WorkflowMode = 'design-and-build'): WorkflowGuide {
   if (!workflowModes.includes(mode)) throw new Error('Workflow mode không hợp lệ.');
-  return { version: workflowVersion, mode, phases: workflowPhases, instructions, interviewGuide, reuseGuide, designQualityGuide, handoffTemplate, modeInstructions: modeInstructions[mode], resources: workflowResources };
+  return { version: workflowVersion, mode, phases: workflowPhases, instructions, interviewGuide, reuseGuide, designQualityGuide, handoffTemplate, taskGuide, modeInstructions: modeInstructions[mode], resources: workflowResources };
 }
 export function workflowPrompt(task: string, mode: WorkflowMode = 'design-and-build') {
   const guide = getWorkflow(mode);
@@ -23,6 +24,7 @@ export function workflowPrompt(task: string, mode: WorkflowMode = 'design-and-bu
     'Component/block reuse reference:\n' + guide.reuseGuide,
     'Design direction and critical review reference:\n' + guide.designQualityGuide,
     'Delivery reference:\n' + guide.handoffTemplate,
+    'Task dossier and completion rules:\n' + guide.taskGuide,
     mode === 'grill-me'
       ? 'Begin with existing context and the highest-impact unanswered question. Interview adaptively, write SPEC.md from actual answers, and stop at the specification. Do not implement the product in this mode.'
       : 'Resolve material unknowns through the interview and SPEC.md before dependent implementation. Produce working code when implementation is requested; verify the primary flow and browser rendering before handoff. Explain remaining gaps.',

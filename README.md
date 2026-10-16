@@ -1,5 +1,34 @@
 # Token Design Studio
 
+## 0.3.0: cài riêng skill gọn và theo dõi tác vụ
+
+Bản ứng dụng local và package skill riêng đã được triển khai. Chưa publish npm; xem [kiểm chứng và giới hạn client](docs/releases/0.3.0.md). Quy trình 1.3.0 ghi hồ sơ trong dự án và chặn đánh dấu hoàn tất trong Studio khi thiếu bằng chứng bắt buộc.
+
+Sau khi package skill được publish:
+
+```sh
+npx token-design-studio-skill@latest install --client codex
+npx token-design-studio-skill@latest install --client antigravity
+```
+
+Trước khi publish, gửi tarball `token-design-studio-skill-0.3.0.tgz` cho người nhận:
+
+```sh
+npm exec --yes --package=./token-design-studio-skill-0.3.0.tgz -- token-design-studio-skill install --client codex
+npm exec --yes --package=./token-design-studio-skill-0.3.0.tgz -- token-design-studio-skill install --client antigravity
+```
+
+Node 22.12+. Gói skill không tải editor/server hoặc dependency runtime bên ngoài, không sửa MCP. Codex dùng `CODEX_HOME` hoặc `~/.codex`; Antigravity **IDE/app** dùng `~/.gemini/config/skills` (khác Antigravity CLI). `--home PATH` chọn thư mục cấu hình client để cài vào môi trường riêng. File Codex `agents/openai.yaml` không được cài sang Antigravity. Mở phiên client mới sau khi cài.
+
+### Hồ sơ thiết kế
+
+Lưu `.token-studio/tasks/<UUID>/task.json` dạng `{ "taskId": "UUID", "task": { ... } }`; tài liệu và ảnh nằm cạnh hồ sơ, đường dẫn bằng chứng tính từ gốc dự án. Mẫu và JSON schema có trong skill. Bộ kiểm tra offline: `node <thư-mục-skill>/scripts/validate-task.cjs <đường-dẫn/task.json>`. Khi có MCP, dùng `create_task`, `list_tasks`, `get_task`, `update_task`, `validate_task`, `complete_task`; có 17 tool, gồm 11 tool cũ. Cập nhật yêu cầu revision tác vụ mới nhất và mở lại tác vụ đã hoàn tất. UI **Tác vụ thiết kế** hiển thị điều kiện còn thiếu và cho đồng bộ JSON, tải hồ sơ, hoàn tất.
+
+Studio lưu bản ghi đồng bộ vào `tasks.json` cạnh `studio.json`; không tự đọc file, tải ảnh từ URL hoặc sửa hồ sơ trong dự án. Khi di chuyển kho 0.3.0, sao lưu cả hai file; lệnh `migrate` vẫn chỉ sao chép kho theme cũ. Dữ liệu theme cũ không đổi định dạng. Liên kết ảnh và thông tin test do agent/người dùng cung cấp, không phải chứng nhận thẩm mỹ hoặc bằng chứng đã được xác thực độc lập.
+
+Developer: `npm run pack:skill`, `npm run test:skill-package`, `npm run pack:local`, `npm run test:package`. Benchmark tác vụ dùng fixture tổng hợp và chỉ chạy chủ động; đọc [báo cáo đánh giá](docs/evaluation/REPORT.md) trước khi kết luận chất lượng.
+
+
 ### 0.2.1 — bộ cài có khả năng phục hồi
 
 Bộ cài skill dùng staging, khóa cùng đích, kiểm tra lại nội dung trước khi thay, backup và nhật ký phục hồi. Setup Codex hoàn nguyên thay đổi của giao dịch khi thất bại; nếu cấu hình bị tiến trình khác chỉnh, giữ nguyên để đối chiếu với backup. `install-skill` hoạt động độc lập với `PORT`. Chi tiết: [release 0.2.1](docs/releases/0.2.1.md).
@@ -43,10 +72,10 @@ Nội dung có thể gửi:
 
 > Cài Node.js 22.12+ và có Codex hỗ trợ skill local. Chạy `npx token-design-studio@latest install-skill`, mở phiên Codex mới, rồi gọi `$token-studio-shadcn` kèm yêu cầu thiết kế. Skill sẽ phỏng vấn, chốt hướng, tạo đặc tả, triển khai và phản biện theo phạm vi bạn yêu cầu.
 
-**Các lệnh `@latest` trong phần này chỉ dùng được sau khi package đã có trên npm registry.** Nếu chưa publish, có thể gửi file `token-design-studio-0.2.0.tgz` cho người nhận. Trong thư mục chứa file, họ chạy:
+**Các lệnh `@latest` trong phần này chỉ dùng được sau khi package đã có trên npm registry.** Nếu chưa publish, có thể gửi file `token-design-studio-0.3.0.tgz` cho người nhận. Trong thư mục chứa file, họ chạy:
 
 ```sh
-npm exec --yes --package=./token-design-studio-0.2.0.tgz -- token-design-studio install-skill
+npm exec --yes --package=./token-design-studio-0.3.0.tgz -- token-design-studio install-skill
 ```
 
 Để cập nhật skill, chạy lại lệnh cài phù hợp. Bản được quản lý chưa chỉnh riêng được cập nhật có sao lưu; nếu đã chỉnh riêng, bộ cài dừng để đối chiếu thay vì ghi đè.
@@ -62,14 +91,14 @@ npm exec --yes --package=./token-design-studio-0.2.0.tgz -- token-design-studio 
 
 ## Cài editor và MCP từ gói npm local
 
-Yêu cầu Node.js 22.12+ và npm. Bản 0.2.0 được chuẩn bị dưới dạng `.tgz`, **chưa phát hành lên npm registry**. Tải hoặc lấy file `output/npm/token-design-studio-0.2.0.tgz` rồi chạy trong thư mục chứa file:
+Yêu cầu Node.js 22.12+ và npm. Bản 0.3.0 được chuẩn bị dưới dạng `.tgz`, **chưa phát hành lên npm registry**. Tải hoặc lấy file `output/npm/token-design-studio-0.3.0.tgz` rồi chạy trong thư mục chứa file:
 
 ```powershell
-npm install -g ./token-design-studio-0.2.0.tgz
+npm install -g ./token-design-studio-0.3.0.tgz
 token-design-studio
 ```
 
-Lệnh mở editor tại **http://127.0.0.1:4318** và HTTP MCP tại **http://127.0.0.1:4318/mcp**. Giữ terminal mở; Ctrl+C để dừng. Gói đã chứa editor và runtime build sẵn; máy sử dụng không cần Git, Vite, TypeScript hoặc bước build. Không có script postinstall tự sửa máy. Có thể dùng tarball không cài global: `npm exec --yes --package=./token-design-studio-0.2.0.tgz -- token-design-studio`.
+Lệnh mở editor tại **http://127.0.0.1:4318** và HTTP MCP tại **http://127.0.0.1:4318/mcp**. Giữ terminal mở; Ctrl+C để dừng. Gói đã chứa editor và runtime build sẵn; máy sử dụng không cần Git, Vite, TypeScript hoặc bước build. Không có script postinstall tự sửa máy. Có thể dùng tarball không cài global: `npm exec --yes --package=./token-design-studio-0.3.0.tgz -- token-design-studio`.
 
 Kết nối Codex một lần, sau khi đã cài Codex CLI:
 

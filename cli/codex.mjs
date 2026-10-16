@@ -6,7 +6,7 @@ import { planSkill, beginSkillInstall } from './skill.mjs';
 function codex(args) {
   let command = 'codex';
   if (process.platform === 'win32') {
-    const paths = spawnSync('where.exe', ['codex'], { encoding: 'utf8', windowsHide: true, timeout: 30000 });
+    const paths = spawnSync('where.exe', ['codex'], { encoding: 'utf8', windowsHide: true, timeout: 5000 });
     const candidates = (paths.stdout || '').trim().split(/\r?\n/).filter(Boolean);
     command = candidates.find(path => /\.exe$/i.test(path)) || candidates.find(path => /\.cmd$/i.test(path)) || 'codex';
     if (/\.cmd$/i.test(command)) {

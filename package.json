@@ -1,10 +1,13 @@
 {
   "name": "token-design-studio",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite\"",
-    "build": "tsc -b && vite build && node scripts/build-runtime.mjs",
+    "build": "npm run skill:build && tsc -b && vite build && node scripts/build-runtime.mjs",
+    "skill:build": "tsx scripts/build-skill.mjs",
+    "pack:skill": "npm run skill:build && node scripts/pack-skill.mjs",
+    "test:skill-package": "node scripts/verify-skill-package.mjs",
     "start": "tsx server/index.ts",
     "typecheck": "tsc -b",
     "test": "tsx --test tests/*.test.ts tests/*.test.mjs",
