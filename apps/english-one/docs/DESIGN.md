@@ -1,0 +1,19 @@
+# Fluento Academy — UX brief and design contract
+
+User: center administrator and teacher (confirmed by the user). Primary job: oversee personalized 1:1 English learning, find the learner needing attention, schedule a session and record progress after it. Source: user-supplied Vietnamese requirements image, which is a business brief rather than an existing visual design.
+
+Scope: independent interactive web application under apps/english-one. Preserve Token Studio. Default administrator overview; selectable teacher view, learner list and detailed profile, teacher list, day/week schedule, personalized roadmaps, tuition and resources. Working local data, scheduling collision checks, manual post-session assessments, searchable/filterable records. Seed data is clearly marked as sample; edits persist in localStorage. No real accounts, video provider, automatic email/SMS, payments or AI evaluation are implied. AI is future work per the brief.
+
+Primary CTA: Đặt lịch học. Success: the selected learner and teacher have a nonconflicting 1:1 session that appears in the schedule and remains after reload. Secondary journey: open a learner profile, review goals/skills/roadmap, record a post-session assessment and update the learner's progress.
+
+Visual direction: Fluento — English, made personal. White sidebar and panels, lavender #F7F8FC background, ink #172035, primary violet #6658E8, soft mint #E5F5EF, soft peach #FFF0E7, fine #E9EAF1 borders. Inter with Vietnamese support for UI; expressive display uses strong tracking and weight with a calm geometric feel. Body 13–14px, primary heading 28px, section headings 16px, captions 11px. 12px card radii, minimal shadow. 236px desktop sidebar, 71px top bar, 24–28px workspace gutter. Content-led top statistics, contextual learning-path banner, today-session rows, calendar and learner progress. The signature is a curved CEFR learning path with A2/B1/B2 milestones; it communicates personal growth, not decoration unrelated to learning.
+
+Responsive: collapse to mobile sidebar drawer below 900px; stack workspace panels and statistics into two columns; allow tables to scroll within their own region; keep booking and primary navigation accessible. Dialogs scroll within the viewport with focus management. No body-level horizontal overflow at 390px. Reduced motion honored.
+
+Component map: shadcn/ui source components for Button, Card, Badge, Avatar, Dialog, Sheet, Tabs, Input, Label/Field, Select, Textarea, Progress, Table, DropdownMenu, Checkbox, Separator, Tooltip and Sonner. Official components are composed into domain-specific calendar, roadmap and session rows; no large dashboard block is installed because its generic analytics/data table does not fit personalized learning. Recharts provides the actual responsive progress chart. Lucide follows the project's icon style.
+
+Source/license: shadcn/ui official registry (MIT), React (MIT), Recharts (MIT), Lucide (ISC), Inter (OFL). Inspect generated component source and current docs before using API. Use the actual installed primitive base consistently. New brand theme is stored in Token Studio and exported as theme.css; merge Tailwind imports and bundled fonts deliberately.
+
+States: search with no matches, booking field validation and time conflict, cancel/confirm modal, empty schedule date, local form save, profile assessment, contextual view switching, disabled video/AI integration explanation. Avoid fabricated live service states. Tuition changes are local bookkeeping and must not claim a financial transaction.
+
+Acceptance: all nav destinations render meaningful content; filters update real data; booking persists without teacher/learner overlap; completed sessions accept manual feedback; profile shows skill levels and chronological progress; teacher mode filters the relevant sessions; desktop/mobile browser checks and production build pass. Log any scope limits in README and handoff.

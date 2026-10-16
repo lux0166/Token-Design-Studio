@@ -1,0 +1,122 @@
+/* Fluento · Learning — Token Studio
+   Tailwind CSS v4 / shadcn/ui. Keep your existing Tailwind imports.
+   System font stack; load a local Inter font if you choose Inter. */
+
+:root {
+  --background: #F7F8FC;
+  --foreground: #172035;
+  --card: #FFFFFF;
+  --card-foreground: #172035;
+  --popover: #FFFFFF;
+  --popover-foreground: #172035;
+  --primary: #6658E8;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EFEDFE;
+  --secondary-foreground: #6152CE;
+  --muted: #F1F2F8;
+  --muted-foreground: #667086;
+  --accent: #E5F5EF;
+  --accent-foreground: #247C61;
+  --destructive: #C43D54;
+  --destructive-foreground: #FFFFFF;
+  --border: #E9EAF1;
+  --input: #E0E3EE;
+  --ring: #6658E8;
+  --chart-1: #6658E8;
+  --chart-2: #968BF3;
+  --chart-3: #56B29A;
+  --chart-4: #F2AF7B;
+  --chart-5: #D58EB2;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #637086;
+  --sidebar-primary: #6658E8;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EFEDFE;
+  --sidebar-accent-foreground: #6658E8;
+  --sidebar-border: #E9EAF1;
+  --sidebar-ring: #6658E8;
+  --radius: 0.75rem;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --base-font-size: 14px;
+  --spacing: 0.25rem;
+}
+
+.dark {
+  --background: #121524;
+  --foreground: #F2F2FA;
+  --card: #1C2033;
+  --card-foreground: #F2F2FA;
+  --popover: #18251F;
+  --popover-foreground: #F1F5F9;
+  --primary: #ADA1FF;
+  --primary-foreground: #211B50;
+  --secondary: #302A50;
+  --secondary-foreground: #E9E3FF;
+  --muted: #292D43;
+  --muted-foreground: #A7AEC3;
+  --accent: #1D4930;
+  --accent-foreground: #BBF7D0;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #363B53;
+  --input: #363B53;
+  --ring: #ADA1FF;
+  --chart-1: #18794E;
+  --chart-2: #38A169;
+  --chart-3: #68D391;
+  --chart-4: #A7F3D0;
+  --chart-5: #D1FAE5;
+  --sidebar: #18251F;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #C4B5FD;
+  --sidebar-primary-foreground: #2E1065;
+  --sidebar-accent: #223C2C;
+  --sidebar-accent-foreground: #DCFCE7;
+  --sidebar-border: #33463B;
+  --sidebar-ring: #4ADE80;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: max(0px, calc(var(--radius) - 4px));
+  --radius-md: max(0px, calc(var(--radius) - 2px));
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: var(--base-font-size); }
+}

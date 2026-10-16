@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/inter";
+@import "./theme.css";
+@import "./app.css";
+
+:root {
+  --font-sans: "Inter Variable", Inter, sans-serif;
+  --font-heading: var(--font-sans);
+  --success: #247c61;
+  --success-soft: #e5f5ef;
+  --warning: #ac632d;
+  --warning-soft: #fff0e4;
+  --info: #397caa;
+  --info-soft: #eaf3fd;
+  --rose-soft: #fcebf0;
+  --rose-ink: #b54366;
+}
+@theme inline {
+  --font-heading: var(--font-sans);
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    margin: 0;
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Token Studio · Design & Ship"
+  short_description: "Interview to a testable spec, then build shadcn screens"
+  default_prompt: "Use $token-studio-shadcn to inspect existing context, interview me about unresolved material decisions, write a testable SPEC.md, then implement the requested shadcn/ui screen and verify it in a browser. If I ask for grill me only, stop at the specification."

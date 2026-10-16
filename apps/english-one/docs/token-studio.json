@@ -1,0 +1,58 @@
+{
+  "systemId": "59a2c492-daeb-4b2f-8d38-57a0e09e3723",
+  "systemName": "Fluento · Learning",
+  "contrast": {
+    "mode": "light",
+    "pairs": [
+      {
+        "text": "accent-foreground",
+        "background": "accent",
+        "ratio": 4.51,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "text": "muted-foreground",
+        "background": "background",
+        "ratio": 4.68,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "text": "secondary-foreground",
+        "background": "secondary",
+        "ratio": 5.05,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "text": "destructive-foreground",
+        "background": "destructive",
+        "ratio": 5.07,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "text": "primary-foreground",
+        "background": "primary",
+        "ratio": 5.09,
+        "aa": true,
+        "aaa": false
+      },
+      {
+        "text": "foreground",
+        "background": "background",
+        "ratio": 15.29,
+        "aa": true,
+        "aaa": true
+      },
+      {
+        "text": "card-foreground",
+        "background": "card",
+        "ratio": 16.22,
+        "aa": true,
+        "aaa": true
+      }
+    ]
+  }
+}

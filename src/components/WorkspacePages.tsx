@@ -1,0 +1,53 @@
+import { useEffect, useState } from 'react';
+import { ArrowRight, ArrowUpRight, Braces, Check, CheckCircle2, Circle, Clock3, Code2, Database, ExternalLink, FileCode2, Layers, Link2, LockKeyhole, Plus, RefreshCw, ShieldCheck, Sparkles, Terminal, Undo2, XCircle } from 'lucide-react';
+import { tokenNames, type DesignSystem, type StudioState } from '../../shared/model';
+import { CopyButton } from './ui';
+import { request } from '../lib/useStudio';
+import { WorkflowPanel } from './WorkflowPanel';
+
+export function OverviewPage({ systems, onSelect, onCreate, onMcp }: { systems: DesignSystem[]; onSelect: (id: string) => void; onCreate: () => void; onMcp: () => void }) {
+  return <div className="workspace-page"><div className="page-heading"><div><h1>Không gian của bạn.</h1><p>Từ ý tưởng đến một hệ thống nhất quán.</p></div><button className="button dark" onClick={onCreate}><Plus /> Tạo design system</button></div><div className="overview-intro"><div><span className="overview-symbol"><Layers /></span><h2>Thiết kế tự do.<br />Làm chủ từng chi tiết.</h2><p>Token, thành phần và agent cùng làm việc trên một hệ thống. Lưu cục bộ, luôn thuộc về bạn.</p><button className="text-button" onClick={onMcp}>Kết nối agent của bạn <ArrowUpRight /></button></div><div className="overview-token-art" aria-hidden="true">{['#18794E', '#55B58C', '#A7F3D0', '#D8EEE2', '#EEF7F1'].map((color, i) => <span key={color} style={{ background: color, transform: `rotate(${i * 10 - 20}deg) translateY(${i * 3}px)` }} />)}</div></div><div className="list-title"><h2>Design systems</h2><span>{systems.length} hệ thống</span></div><div className="overview-systems">{systems.map(s => <button key={s.id} onClick={() => onSelect(s.id)}><div className="system-mini-preview" style={{ background: s.light.background }}><span style={{ color: s.light.foreground, fontFamily: s.settings.font }}>Aa<span style={{ color: s.light.primary }}>.</span></span><div>{['primary', 'secondary', 'accent', 'foreground'].map(key => <i key={key} style={{ background: s.light[key as 'primary'], borderRadius: s.settings.radius / 2 }} />)}</div></div><div className="system-card-title"><strong>{s.name}</strong><ArrowUpRight /></div><p>{tokenNames.length * 2} màu · {s.settings.font} · {s.settings.radius}px</p><small>Cập nhật {new Date(s.updatedAt).toLocaleDateString('vi-VN')}</small></button>)}</div><div className="ownership-note"><Database /><div><strong>Không thuê bao. Không giới hạn số lần chỉnh sửa.</strong><p>Ứng dụng chạy trên máy của bạn. Agent sử dụng gói AI mà bạn đang có.</p></div></div></div>;
+}
+
+interface ServerStatus { status: string; version: string; endpoint: string; dataFile: string; root: string; tools: number }
+export function McpPage({ calls, online }: { calls: StudioState['calls']; online: boolean }) {
+  const [status, setStatus] = useState<ServerStatus | null>(null);
+  const [client, setClient] = useState('codex');
+  useEffect(() => { void request<ServerStatus>('/api/status').then(setStatus).catch(() => setStatus(null)); }, [online]);
+  const endpoint = status?.endpoint ?? 'http://127.0.0.1:4318/mcp';
+  const commands: Record<string, string> = {
+    codex: `codex mcp add token-studio --url ${endpoint}`,
+    claude: `claude mcp add --transport http token-studio ${endpoint}`,
+    cursor: JSON.stringify({ mcpServers: { 'token-studio': { url: endpoint } } }, null, 2),
+    desktop: JSON.stringify({ mcpServers: { 'token-studio': { command: 'node', args: [status ? `${status.root.replaceAll('\\', '/')}/node_modules/tsx/dist/cli.mjs` : '/path/to/token-studio/node_modules/tsx/dist/cli.mjs', status ? `${status.root.replaceAll('\\', '/')}/server/stdio.ts` : '/path/to/token-studio/server/stdio.ts'] } } }, null, 2),
+  };
+  const tools = [
+    ['get_workflow', 'Phỏng vấn → đặc tả → thiết kế → code và kiểm chứng', 'Đọc'],
+    ['list_systems', 'Danh sách hệ thống trong workspace', 'Đọc'],
+    ['get_system', 'Đọc token, khóa và phiên bản hiện tại', 'Đọc'],
+    ['list_themes', 'Tìm theme có sẵn, lấy ID và mẫu màu sáng/tối', 'Đọc'],
+    ['get_theme', 'Đọc toàn bộ theme và ghi chú tương thích', 'Đọc'],
+    ['apply_theme', 'Xem trước / áp dụng theme, giữ token đã khóa', 'Ghi'],
+    ['create_system', 'Tạo design system từ bảng màu có sẵn', 'Ghi'],
+    ['update_tokens', 'Chỉnh màu, kiểu chữ và khoảng cách', 'Ghi'],
+    ['export_css', 'Xuất CSS cho Tailwind v4 / shadcn/ui', 'Đọc'],
+    ['check_contrast', 'Kiểm tra tương phản WCAG AA / AAA', 'Đọc'],
+    ['import_css', 'Xem trước hoặc áp dụng theme từ CSS', 'Ghi'],
+  ];
+  return <div className="workspace-page mcp-page"><div className="page-heading"><div><h1>Kết nối MCP</h1><p>Đưa design system vào cuộc trò chuyện với agent.</p></div><span className={`connection-badge ${online ? '' : 'disconnected'}`}><span className="status-dot" />{online ? 'Server đang chạy' : 'Server ngoại tuyến'}</span></div><section className="connection-panel"><div className="connection-mark"><Link2 /></div><h2>Agent của bạn. Hệ thống của bạn.</h2><p>Chỉnh token bằng ngôn ngữ tự nhiên, xem thay đổi trực tiếp trong editor.<br />Dùng Codex, Claude Code, Cursor hoặc bất kỳ MCP client tương thích.</p><div className="endpoint-row"><span>Streamable HTTP</span><code>{endpoint}</code><CopyButton value={endpoint} label="Chép URL" /></div><div className="setup-client-tabs">{[['codex', 'Codex'], ['claude', 'Claude Code'], ['cursor', 'Cursor'], ['desktop', 'Claude Desktop']].map(([id, label]) => <button key={id} onClick={() => setClient(id)} className={client === id ? 'active' : ''}>{label}</button>)}</div><div className="code-block"><div><span>{client === 'cursor' ? '.cursor/mcp.json' : client === 'desktop' ? 'claude_desktop_config.json' : 'Terminal'}</span><CopyButton value={commands[client]} /></div><pre>{commands[client]}</pre></div><p className="setup-help">{client === 'cursor' ? 'Thêm cấu hình vào .cursor/mcp.json, rồi bật server trong MCP settings.' : client === 'desktop' ? 'Thêm cấu hình vào Claude Desktop, rồi khởi động lại client. Giữ Token Studio đang chạy.' : 'Chạy lệnh trên, sau đó mở phiên agent mới để tải danh sách công cụ.'} Không cần API key cho Token Studio.</p><div className="agent-prompt"><Sparkles /><div><strong>Thử yêu cầu đầu tiên</strong><p>“Dùng Token Studio, đổi màu chính của Studio mặc định sang xanh dương. Giữ nguyên token đã khóa và kiểm tra độ tương phản.”</p></div></div></section><WorkflowPanel /><div className="mcp-info-grid"><section className="plain-panel"><h2><Braces /> Công cụ có sẵn <span>{tools.length}</span></h2><div className="tool-list">{tools.map(([name, desc, type]) => <div key={name}><div><code>{name}</code><p>{desc}</p></div><span className={type === 'Ghi' ? 'tool-write' : ''}>{type}</span></div>)}</div></section><section className="plain-panel"><h2><ShieldCheck /> Bạn luôn nắm quyền</h2><div className="permission-item"><LockKeyhole /><div><strong>Tôn trọng token đã khóa</strong><p>Agent không có công cụ mở khóa. Batch có token bị khóa sẽ bị từ chối toàn bộ.</p></div></div><div className="permission-item"><Undo2 /><div><strong>Có thể hoàn tác</strong><p>Mỗi lần agent chỉnh sửa được ghi vào lịch sử. Hoàn tác ngay trong editor.</p></div></div><div className="permission-item"><Database /><div><strong>Dữ liệu cục bộ</strong><p>Server chỉ lắng nghe trên 127.0.0.1. Token được lưu trong file trên máy.</p></div></div>{status && <div className="data-location"><small>VỊ TRÍ DỮ LIỆU</small><code>{status.dataFile}</code></div>}</section></div><section className="plain-panel call-panel"><h2><Clock3 /> Hoạt động từ agent <span>{calls.length}</span></h2>{calls.length === 0 ? <div className="empty-calls"><Terminal /><strong>Chưa có lời gọi MCP</strong><p>Kết nối một agent và gọi list_systems để bắt đầu.</p></div> : <div className="call-list">{calls.slice(0, 20).map(call => <div key={call.id}>{call.ok ? <CheckCircle2 className="green-text" /> : <XCircle className="warning-text" />}<code>{call.tool}</code><span>{call.ok ? 'Thành công' : call.detail}</span><time>{new Date(call.at).toLocaleTimeString('vi-VN')}</time></div>)}</div>}</section></div>;
+}
+
+export function HistoryPage({ system, travel, pending }: { system: DesignSystem; travel: (d: 'undo' | 'redo') => Promise<boolean>; pending: boolean }) {
+  return <div className="workspace-page history-page"><div className="page-heading"><div><h1>Lịch sử thay đổi</h1><p>{system.name} · Lưu tối đa 60 thay đổi gần nhất</p></div><div className="toolbar-actions"><button className="button" disabled={pending || system.cursor === 0} onClick={() => void travel('undo')}><Undo2 /> Hoàn tác</button><button className="button" disabled={pending || system.cursor === system.history.length} onClick={() => void travel('redo')}><RefreshCw /> Làm lại</button></div></div>{system.history.length === 0 ? <div className="empty-state"><Clock3 /><h2>Mọi hành trình bắt đầu từ đây.</h2><p>Chỉnh một token trong editor. Thay đổi của bạn và agent sẽ xuất hiện ở đây.</p></div> : <div className="history-timeline">{system.history.map((entry, i) => {
+    const changes: { path: string; before: string; after: string }[] = [];
+    for (const group of ['light', 'dark', 'settings'] as const) for (const [key, value] of Object.entries(entry.after[group])) {
+      const before = (entry.before[group] as Record<string, unknown>)[key];
+      if (before !== value) changes.push({ path: `${group}.${key}`, before: String(before), after: String(value) });
+    }
+    if (entry.before.name !== entry.after.name) changes.push({ path: 'name', before: entry.before.name, after: entry.after.name });
+    if (entry.before.locks.join() !== entry.after.locks.join()) changes.push({ path: 'locks', before: entry.before.locks.join(', ') || 'Không khóa', after: entry.after.locks.join(', ') || 'Không khóa' });
+    const applied = i < system.cursor;
+    return <section key={entry.id} className={`history-entry ${applied ? '' : 'undone'}`}><span className="timeline-dot">{entry.source === 'agent' ? <Sparkles /> : <Check />}</span><div className="history-entry-heading"><div><h3>{entry.summary}</h3><span>{entry.source === 'agent' ? 'MCP agent' : 'Bạn'} <span>·</span> {new Date(entry.at).toLocaleString('vi-VN')}</span></div><span className={`history-status ${applied ? '' : 'reverted'}`}>{applied ? 'Đã áp dụng' : 'Đã hoàn tác'}</span></div><div className="history-changes">{changes.map(change => <div key={change.path}><code>{change.path}</code><span>{/^#[0-9A-F]{6}$/i.test(change.before) && <i style={{ background: change.before }} />}{change.before}</span><ArrowRight /><span>{/^#[0-9A-F]{6}$/i.test(change.after) && <i style={{ background: change.after }} />}{change.after}</span></div>)}</div></section>;
+  }).reverse()}</div>}</div>;
+}
+
