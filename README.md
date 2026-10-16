@@ -26,7 +26,7 @@ Lưu `.token-studio/tasks/<UUID>/task.json` dạng `{ "taskId": "UUID", "task": 
 
 Studio lưu bản ghi đồng bộ vào `tasks.json` cạnh `studio.json`; không tự đọc file, tải ảnh từ URL hoặc sửa hồ sơ trong dự án. Khi di chuyển kho 0.3.0, sao lưu cả hai file; lệnh `migrate` vẫn chỉ sao chép kho theme cũ. Dữ liệu theme cũ không đổi định dạng. Liên kết ảnh và thông tin test do agent/người dùng cung cấp, không phải chứng nhận thẩm mỹ hoặc bằng chứng đã được xác thực độc lập.
 
-Developer: `npm run pack:skill`, `npm run test:skill-package`, `npm run pack:local`, `npm run test:package`. Benchmark tác vụ dùng fixture tổng hợp và chỉ chạy chủ động; đọc [báo cáo đánh giá](docs/evaluation/REPORT.md) trước khi kết luận chất lượng.
+Developer: `npm run pack:skill`, `npm run test:skill-package`, `npm run pack:local`, `npm run test:package`. Dựng lại bản vá riêng: `npm run pack:legacy`, rồi `npm run test:package -- output/npm/token-design-studio-0.2.1.tgz`; source mốc 0.2.1 được giữ riêng, có backport sửa lỗi đối chiếu đường dẫn thực. Benchmark tác vụ dùng fixture tổng hợp và chỉ chạy chủ động; đọc [báo cáo đánh giá](docs/evaluation/REPORT.md) trước khi kết luận chất lượng.
 
 
 ### 0.2.1 — bộ cài có khả năng phục hồi

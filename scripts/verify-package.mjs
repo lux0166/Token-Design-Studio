@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, realpathSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
@@ -33,13 +33,16 @@ try {
   npm(['install', '--prefix', installDir, '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
   const root = join(installDir, 'node_modules/token-design-studio'), cli = join(root, 'bin/token-design-studio.mjs');
   const installed = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  assert.ok(['0.2.1', '0.3.0'].includes(installed.version), 'Supported release artifact');
+  const expectedTools = installed.version === '0.2.1' ? 11 : 17;
+  const expectedWorkflow = installed.version === '0.2.1' ? '1.2.0' : '1.3.0';
   for (const file of ['dist/index.html', 'runtime/server.js', 'runtime/stdio.js', 'skills/token-studio-shadcn/references/design-quality.md', 'third_party/tweakcn/LICENSE', 'third_party/inter/LICENSE']) assert.ok(existsSync(join(root, file)), file);
   for (const file of ['data', 'apps', 'tests', 'docs', 'server', 'src', 'scripts', '.env']) assert.equal(existsSync(join(root, file)), false, file);
   for (const dep of ['tsx', 'vite', 'esbuild', 'react', 'react-dom', 'lucide-react']) assert.equal(existsSync(join(installDir, 'node_modules', dep)), false, dep);
   assert.equal(installed.bin['token-design-studio'], 'bin/token-design-studio.mjs');
-  assert.ok(npm(['exec', '--prefix', installDir, '--no', '--', 'token-design-studio', '--version']).includes(metadata.version));
+  assert.ok(npm(['exec', '--prefix', installDir, '--no', '--', 'token-design-studio', '--version']).includes(installed.version));
   pass('clean tarball install + executable + built assets, no development dependencies');
-  assert.ok(npm(['exec', '--yes', '--ignore-scripts', '--cache', join(temp, 'npm cache'), '--package', tarball, '--', 'token-design-studio', '--version'], temp).includes(metadata.version));
+  assert.ok(npm(['exec', '--yes', '--ignore-scripts', '--cache', join(temp, 'npm cache'), '--package', tarball, '--', 'token-design-studio', '--version'], temp).includes(installed.version));
   pass('npm exec from tarball in an empty directory with a clean npm cache');
   const env = { ...process.env, CODEX_HOME: home }; delete env.STUDIO_DATA_FILE; delete env.STUDIO_DATA_DIR; delete env.PORT;
   const run = args => spawnSync(process.execPath, [cli, ...args], { cwd: temp, env, encoding: 'utf8', timeout: 30000, windowsHide: true });
@@ -56,12 +59,14 @@ try {
     } throw new Error(child.output || 'Server startup timeout');
   };
   let server = start(port, dataDir);
-  const status = await waitReady(server); assert.equal(status.version, metadata.version); assert.equal(status.workflowVersion, '1.3.0');
-  assert.equal(status.stdio.command, process.execPath); assert.deepEqual(status.stdio.args, [join(root, 'runtime/stdio.js')]);
-  assert.equal(resolve(status.dataFile).toLowerCase(), resolve(dataDir, 'studio.json').toLowerCase());
+  const status = await waitReady(server); assert.equal(status.version, installed.version); assert.equal(status.workflowVersion, expectedWorkflow);
+  assert.equal(realpathSync(status.stdio.command), realpathSync(process.execPath)); assert.deepEqual(status.stdio.args.map(path => realpathSync(path)), [realpathSync(join(root, 'runtime/stdio.js'))]);
+  assert.equal(realpathSync(status.dataFile), realpathSync(resolve(dataDir, 'studio.json')));
   const html = await (await fetch(base)).text(); assert.match(html, /<div id="root">/);
   const asset = html.match(/src="([^"]+\.js)"/)[1]; assert.equal((await fetch(new URL(asset, base))).status, 200);
   assert.equal(run(['--no-open', '--port', String(port), '--data-dir', dataDir]).status, 0);
+  const alias = join(temp, 'same data via alias'); symlinkSync(dataDir, alias, process.platform === 'win32' ? 'junction' : 'dir');
+  const reusedAlias = run(['--no-open', '--port', String(port), '--data-dir', alias]); assert.equal(reusedAlias.status, 0, reusedAlias.stderr);
   assert.equal(spawnSync(process.execPath, [cli, '--no-open', '--port', String(port), '--data-dir', dataDir], { cwd: temp, env: { ...env, STUDIO_DATA_FILE: join(temp, 'wrong-env.json') }, encoding: 'utf8', timeout: 10000 }).status, 0);
   assert.equal(existsSync(join(temp, 'wrong-env.json')), false);
   assert.equal(run(['--no-open', '--port', String(port), '--data-dir', join(temp, 'other')]).status, 1);
@@ -69,11 +74,11 @@ try {
   pass('packaged editor + static assets + compatible reuse + different-store conflict');
   client = new Client({ name: 'package-smoke', version: '1.0.0' });
   await client.connect(new StdioClientTransport({ command: process.execPath, args: [cli, 'mcp', '--port', String(port)], cwd: temp, env }));
-  assert.equal((await client.listTools()).tools.length, 17);
+  assert.equal((await client.listTools()).tools.length, expectedTools);
   const advertised = new Client({ name: 'advertised-desktop-config', version: '1.0.0' });
   try {
     await advertised.connect(new StdioClientTransport({ command: status.stdio.command, args: status.stdio.args, cwd: temp, env: { ...env, STUDIO_MCP_URL: `${base}/mcp` } }));
-    assert.equal((await advertised.listTools()).tools.length, 17);
+    assert.equal((await advertised.listTools()).tools.length, expectedTools);
   } finally { await advertised.close(); }
   const call = async (name, args) => {
     const response = await client.callTool({ name, arguments: args }); assert.ok(!response.isError, JSON.stringify(response)); return JSON.parse(response.content[0].text);
@@ -83,19 +88,22 @@ try {
   const before = await call('get_system', { systemId: created.id });
   await call('update_tokens', { systemId: created.id, expectedRevision: before.revision, patch: { settings: { radius: 17 } } });
   const saved = await (await fetch(`${base}/api/state`)).json(); assert.equal(saved.systems.find(s => s.id === created.id).settings.radius, 17);
-  const task = await call('create_task', { task: { title: 'Package grill fixture', goal: 'Specify schedule rules', project: 'Package verification', mode: 'grill-me', acceptanceCriteria: ['Rules specified'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Specification', path: '.token-studio/tasks/package/SPEC.md' }] } });
+  let task;
+  if (expectedTools === 17) {
+  task = await call('create_task', { task: { title: 'Package grill fixture', goal: 'Specify schedule rules', project: 'Package verification', mode: 'grill-me', acceptanceCriteria: ['Rules specified'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Specification', path: '.token-studio/tasks/package/SPEC.md' }] } });
   assert.equal((await call('validate_task', { taskId: task.id })).valid, true);
   const completedTask = await call('complete_task', { taskId: task.id, expectedRevision: task.revision }); assert.equal(completedTask.status, 'completed');
   assert.equal((await (await fetch(`${base}/api/state`)).json()).revision, saved.revision);
+  }
   await client.close(); client = null;
-  pass('real packaged stdio → HTTP MCP: 17 tools, workflow and persisted token writes');
+  pass(`real packaged stdio → HTTP MCP: ${expectedTools} tools, workflow and persisted token writes`);
   const bytes = readFileSync(join(dataDir, 'studio.json'));
   const second = run(['--no-open', '--port', '14379', '--data-dir', dataDir]);
   assert.equal(second.status, 1); assert.deepEqual(readFileSync(join(dataDir, 'studio.json')), bytes);
   pass('cross-port writer lock refuses a second server without data changes');
   await stop(server);
   server = start(port, dataDir); await waitReady(server);
-  assert.equal((await (await fetch(`${base}/api/tasks/${task.id}`)).json()).status, 'completed');
+  if (task) assert.equal((await (await fetch(`${base}/api/tasks/${task.id}`)).json()).status, 'completed');
   assert.deepEqual((await (await fetch(`${base}/api/state`)).json()).systems, saved.systems);
   pass('restart/crash-stale-lock recovery preserves systems and history');
   const migrationDir = join(temp, 'migrated');
@@ -128,7 +136,7 @@ try {
   assert.equal(existsSync(join(temp, 'collision/studio.json')), false);
   pass('unrelated occupied port does not create a new store');
   await stop(server);
-  console.log(JSON.stringify({ tarball, version: metadata.version, checks: results.length, results }, null, 2));
+  console.log(JSON.stringify({ tarball, version: installed.version, checks: results.length, results }, null, 2));
 } finally {
   if (client) await client.close();
   if (extraServer) await new Promise(done => extraServer.close(done));

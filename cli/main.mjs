@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { spawn } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
-import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, writeFileSync, realpathSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import lockfile from 'proper-lockfile';
 import { packageRoot, metadata, defaultDataDirectory, codexHome } from './paths.mjs';
@@ -34,7 +34,10 @@ function openBrowser(url) {
   const child = spawn(command, args, { stdio: 'ignore', detached: true, windowsHide: true });
   child.on('error', () => console.error(`Mở trình duyệt tại ${url}`)); child.unref();
 }
-const normalized = path => process.platform === 'win32' ? resolve(path).toLowerCase() : resolve(path);
+const normalized = path => {
+  const canonical = existsSync(path) ? realpathSync(path) : resolve(path);
+  return process.platform === 'win32' ? canonical.toLowerCase() : canonical;
+};
 const portInUse = port => new Promise(done => {
   const socket = createConnection({ host: '127.0.0.1', port });
   const finish = value => { socket.destroy(); done(value); };

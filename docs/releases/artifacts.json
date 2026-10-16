@@ -3,13 +3,13 @@
   "artifacts": [
     {
       "name": "token-design-studio-0.2.1.tgz",
-      "bytes": 439609,
-      "sha256": "db3e7ec6b82de07543af81d79eb425177653c27b489ff29c6c270d27f6db43a8"
+      "bytes": 439679,
+      "sha256": "ffd5586acf5e9c7f1de8c14e4dbad29cac43e16a4228c862c83f8c2ab7f42405"
     },
     {
       "name": "token-design-studio-0.3.0.tgz",
-      "bytes": 550780,
-      "sha256": "e1a562689728b5ff141f9d72bc0e8b7b28455e7927ff26f83a1e3a2403fe72c9"
+      "bytes": 550885,
+      "sha256": "1dc9ef3936f444eeca266f6bac38d7c4d99d72754cddea9150c53ed917b1cd11"
     },
     {
       "name": "token-design-studio-skill-0.3.0.tgz",
