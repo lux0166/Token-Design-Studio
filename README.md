@@ -1,5 +1,9 @@
 # Token Design Studio
 
+### 0.2.1 — bộ cài có khả năng phục hồi
+
+Bộ cài skill dùng staging, khóa cùng đích, kiểm tra lại nội dung trước khi thay, backup và nhật ký phục hồi. Setup Codex hoàn nguyên thay đổi của giao dịch khi thất bại; nếu cấu hình bị tiến trình khác chỉnh, giữ nguyên để đối chiếu với backup. `install-skill` hoạt động độc lập với `PORT`. Chi tiết: [release 0.2.1](docs/releases/0.2.1.md).
+
 Trình quản lý design system chạy local, có editor tiếng Việt và MCP server thật. Bạn sở hữu mã nguồn và dữ liệu, không cần tài khoản hoặc thuê bao Token Studio.
 
 Bạn có thể cài riêng **skill thiết kế cho Codex**, hoặc dùng thêm **editor + MCP** để quản lý và đồng bộ theme.

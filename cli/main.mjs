@@ -47,12 +47,12 @@ export async function main(args = process.argv.slice(2)) {
   if (values.help) { console.log(help); return; }
   if (values.version) { console.log(metadata.version); return; }
   const command = positionals[0] || 'start';
+  if (command === 'install-skill' && positionals.length === 1) { console.log(JSON.stringify(installSkill(), null, 2)); return; }
   const port = Number(values.port || process.env.PORT || 4318);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Port phải là số nguyên từ 1 đến 65535.');
   const dataDir = resolve(values['data-dir'] || defaultDataDirectory());
   const dataFile = resolve(values['data-dir'] ? join(dataDir, 'studio.json') : process.env.STUDIO_DATA_FILE || join(dataDir, 'studio.json'));
   const url = `http://127.0.0.1:${port}`;
-  if (command === 'install-skill' && positionals.length === 1) { console.log(JSON.stringify(installSkill(), null, 2)); return; }
   if (command === 'setup' && positionals.length === 2 && positionals[1] === 'codex') { console.log(JSON.stringify(setupCodex(port, values['replace-mcp']), null, 2)); console.log('Mở phiên Codex mới. Chạy Token Design Studio trước khi dùng MCP.'); return; }
   if (command === 'doctor' && positionals.length === 1) { console.log(JSON.stringify({ version: metadata.version, node: process.version, dataFile, codexHome: codexHome(), server: await probe(port) }, null, 2)); return; }
   if (command === 'migrate' && positionals.length === 2) {
