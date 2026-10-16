@@ -25,7 +25,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const client = new Client({ name: 'integration-test', version: '1.0.0' });
   await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp`)));
   t.after(() => client.close());
-  const list = await client.listTools(); assert.equal(list.tools.length, 11);
+  const list = await client.listTools(); assert.equal(list.tools.length, 17);
   assert.ok(list.tools.some(tool => tool.name === 'get_workflow'));
   assert.ok(client.getInstructions()?.includes('get_workflow'));
   const call = async (name: string, args = {}) => {
@@ -38,7 +38,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const workflow = JSON.parse((await call('get_workflow', { mode: 'replicate' })).data);
   assert.equal(workflow.mode, 'replicate');
   assert.equal(workflow.phases.length, 7);
-  assert.equal(workflow.version, '1.2.0');
+  assert.equal(workflow.version, '1.3.0');
   assert.ok(workflow.phases.some((phase: { id: string }) => phase.id === 'interview'));
   assert.match(workflow.interviewGuide, /SPEC.md/);
   assert.equal(workflow.designQualityGuide, readFileSync(resolve('skills/token-studio-shadcn/references/design-quality.md'), 'utf8'));
@@ -101,7 +101,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const preview = await call('import_css', { systemId: id, css: ':root { --radius: 1rem; }', apply: false }); assert.equal(JSON.parse(preview.data).applied, false); assert.equal((await state()).systems[0].settings.radius, 12);
   const apply = await call('import_css', { systemId: id, css: ':root { --radius: 1rem; }', apply: true, expectedRevision: (await state()).revision }); assert.ok(!apply.error, apply.data); assert.equal((await state()).systems[0].settings.radius, 16);
   const resources = await client.listResources(); assert.ok(resources.resources.some(resource => resource.uri === 'token-studio://workspace'));
-  assert.equal(resources.resources.length, 7);
+  assert.equal(resources.resources.length, 9);
   const catalogList = JSON.parse((await call('list_themes', { query: 'cyber' })).data);
   assert.equal(catalogList.themes.length, 1);
   assert.equal(catalogList.themes[0].id, 'tweakcn:cyberpunk');
@@ -141,7 +141,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const stdio = new Client({ name: 'stdio-test', version: '1.0.0' });
   await stdio.connect(new StdioClientTransport({ command: process.execPath, args: ['--import', 'tsx', resolve('server/stdio.ts')], cwd: resolve('.'), env: { ...Object.fromEntries(Object.entries(process.env).filter((v): v is [string, string] => v[1] !== undefined)), STUDIO_MCP_URL: `${base}/mcp` } }));
   t.after(() => stdio.close());
-  const stdioList = await stdio.listTools(); assert.equal(stdioList.tools.length, 11);
+  const stdioList = await stdio.listTools(); assert.equal(stdioList.tools.length, 17);
   assert.ok(stdio.getInstructions()?.includes('get_workflow'));
   const stdioPrompts = await stdio.listPrompts();
   assert.deepEqual(stdioPrompts.prompts, promptList.prompts);
@@ -160,4 +160,21 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   if (Array.isArray(stdioTheme.content) && stdioTheme.content[0]?.type === 'text') assert.deepEqual(JSON.parse(stdioTheme.content[0].text), catalogTheme);
   const viaStdio = await stdio.callTool({ name: 'get_system', arguments: { systemId: id } });
   assert.ok(!viaStdio.isError);
+  const themeRevisionBeforeTasks = (await state()).revision;
+  const post = (path: string, body: unknown, method = 'POST') => fetch(base + path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const taskContent = { title: 'Chốt quy tắc đổi lịch', goal: 'Làm rõ quy tắc trước code.', project: 'English', mode: 'grill-me', acceptanceCriteria: ['Có quy tắc và ngoại lệ'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Đặc tả', path: '.token-studio/tasks/demo/SPEC.md' }] };
+  const taskResponse = await post('/api/tasks', { task: taskContent }); assert.equal(taskResponse.status, 201); const taskRecord = await taskResponse.json();
+  const fromStdio = await stdio.callTool({ name: 'get_task', arguments: { taskId: taskRecord.id } });
+  assert.ok(Array.isArray(fromStdio.content) && fromStdio.content[0]?.type === 'text'); assert.deepEqual(JSON.parse(fromStdio.content[0].text), taskRecord);
+  assert.equal(JSON.parse((await call('validate_task', { taskId: taskRecord.id })).data).valid, true);
+  assert.equal((await client.readResource({ uri: 'token-studio://tasks/schema' })).contents[0].mimeType, 'application/json');
+  const completed = JSON.parse((await call('complete_task', { taskId: taskRecord.id, expectedRevision: 0 })).data); assert.equal(completed.status, 'completed');
+  assert.equal((await post(`/api/tasks/${taskRecord.id}`, { task: taskContent, expectedRevision: 0 }, 'PATCH')).status, 409);
+  const reopened = await (await post(`/api/tasks/${taskRecord.id}`, { task: { ...taskContent, artifacts: [] }, expectedRevision: completed.revision }, 'PATCH')).json();
+  assert.equal(reopened.status, 'in-progress');
+  assert.equal((await post(`/api/tasks/${taskRecord.id}/complete`, { expectedRevision: reopened.revision })).status, 422);
+  assert.equal((await call('complete_task', { taskId: taskRecord.id, expectedRevision: reopened.revision })).error, true);
+  assert.equal((await state()).revision, themeRevisionBeforeTasks);
+  assert.ok(workflow.taskGuide.includes('complete_task'));
+  assert.deepEqual(await stdio.readResource({ uri: workflow.resources.tasks }), await client.readResource({ uri: workflow.resources.tasks }));
 });

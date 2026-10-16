@@ -9,6 +9,8 @@ Use a consistent path from the user's task to working UI: **brief → interview 
 
 Token Studio owns the theme, locks and change history. The target repository owns application code. A shadcn registry provides components and blocks. Use each source for its real capability; Token Studio does not supply a component registry or a Figma bridge.
 
+For requested implementation or interview-to-spec work, read [references/tasks.md](references/tasks.md). Keep a proportionate project dossier under `.token-studio/tasks/<UUID>/`: actual decisions, artifacts, checks and repairs. Use the bundled template/schema, not an invented wire format. Sync through the six task MCP tools when available; validate and complete only when the reported evidence meets the mode's requirements. Studio refuses incomplete completion records but cannot prevent external code changes or authenticate design evidence. For critique-only requests, deliver findings without creating an implementation task unless requested.
+
 For design work, read [references/design-quality.md](references/design-quality.md). Self-review the direction before dependent UI code and critique the actual render before handoff. When new UI has no clear brand/reference, propose two concise, meaningfully different directions with reasons and ask the human to choose; do not interpret silence as a choice. A clear reference, prior choice or explicit bounded delegation removes that interview gap. Do not add a human approval round for an already resolved direction. For an explicit critique-only request, deliver findings without unrequested code changes.
 
 ## 1. Read the context before asking

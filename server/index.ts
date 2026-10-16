@@ -10,6 +10,8 @@ import { z } from 'zod';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { hostHeaderValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { StudioStore, StoreError } from './store.js';
+import { TaskStore } from './tasks.js';
+import { taskInputSchema } from '../shared/tasks.js';
 import { createMcpServer, type AgentOperations } from './mcp.js';
 import { contrastReport, exportCss, snapshotSchema, patchSchema } from '../shared/model.js';
 import { parseThemeCss } from './css.js';
@@ -23,9 +25,16 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT k
 const requestedDataFile = resolve(process.env.STUDIO_DATA_FILE ?? resolve(projectRoot, 'data/studio.json'));
 mkdirSync(dirname(requestedDataFile), { recursive: true });
 const dataFile = existsSync(requestedDataFile) ? realpathSync(requestedDataFile) : resolve(realpathSync(dirname(requestedDataFile)), basename(requestedDataFile));
-const releaseLock = await lockfile.lock(dataFile, { realpath: false, retries: { retries: 24, minTimeout: 500, maxTimeout: 500, factor: 1 } });
-process.once('exit', () => { try { lockfile.unlockSync(dataFile, { realpath: false }); } catch { /* Already released or compromised. */ } });
+const tasksFile = resolve(dirname(dataFile), 'tasks.json');
+if (tasksFile === dataFile) throw new Error('STUDIO_DATA_FILE không được trùng tasks.json dành cho hồ sơ tác vụ.');
+const lockOptions = { realpath: false, retries: { retries: 24, minTimeout: 500, maxTimeout: 500, factor: 1 } };
+const releaseDataLock = await lockfile.lock(dataFile, lockOptions);
+let releaseTasksLock;
+try { releaseTasksLock = await lockfile.lock(tasksFile, lockOptions); } catch (error) { await releaseDataLock(); throw error; }
+const releaseLock = async () => { await Promise.all([releaseDataLock(), releaseTasksLock()]); };
+process.once('exit', () => { for (const path of [dataFile, tasksFile]) try { lockfile.unlockSync(path, { realpath: false }); } catch { /* Already released. */ } });
 const store = new StudioStore(dataFile);
+const tasks = new TaskStore(tasksFile);
 const app = express();
 app.disable('x-powered-by');
 app.use(hostHeaderValidation(['127.0.0.1', 'localhost', '[::1]']));
@@ -67,7 +76,22 @@ const ops: AgentOperations = {
   },
 };
 app.get('/api/state', (_req, res) => res.json(store.read()));
-app.get('/api/status', (_req, res) => res.json({ status: 'online', application: 'token-design-studio', protocolVersion: 1, version, endpoint: `http://127.0.0.1:${port}/mcp`, dataFile: store.path, root: projectRoot, tools: 11, prompts: 2, themes: themeCatalog.length, workflowVersion, stdio: { command: process.execPath, args: existsSync(resolve(projectRoot, 'runtime/stdio.js')) ? [resolve(projectRoot, 'runtime/stdio.js')] : [resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'), resolve(projectRoot, 'server/stdio.ts')] } }));
+app.get('/api/status', (_req, res) => res.json({ status: 'online', application: 'token-design-studio', protocolVersion: 1, version, endpoint: `http://127.0.0.1:${port}/mcp`, dataFile: store.path, tasksFile, root: projectRoot, tools: 17, prompts: 2, themes: themeCatalog.length, workflowVersion, stdio: { command: process.execPath, args: existsSync(resolve(projectRoot, 'runtime/stdio.js')) ? [resolve(projectRoot, 'runtime/stdio.js')] : [resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'), resolve(projectRoot, 'server/stdio.ts')] } }));
+app.get('/api/tasks', (_req, res) => res.json(tasks.list()));
+app.post('/api/tasks', (req, res) => {
+  const input = z.object({ task: taskInputSchema, taskId: z.string().uuid().optional() }).strict().parse(req.body);
+  res.status(201).json(tasks.create(input.task, input.taskId));
+});
+app.get('/api/tasks/:id', (req, res) => res.json(tasks.get(req.params.id)));
+app.patch('/api/tasks/:id', (req, res) => {
+  const input = z.object({ task: taskInputSchema, expectedRevision: z.number().int().min(0) }).strict().parse(req.body);
+  res.json(tasks.update(req.params.id, input.task, input.expectedRevision));
+});
+app.post('/api/tasks/:id/validate', (req, res) => res.json(tasks.validate(req.params.id)));
+app.post('/api/tasks/:id/complete', (req, res) => {
+  const input = z.object({ expectedRevision: z.number().int().min(0) }).strict().parse(req.body);
+  res.json(tasks.complete(req.params.id, input.expectedRevision));
+});
 app.get('/api/workflow', (req, res) => {
   const mode = z.enum(workflowModes).default('design-and-build').parse(req.query.mode);
   res.json(getWorkflow(mode));
@@ -102,7 +126,7 @@ app.get('/api/systems/:id/export', (req, res) => {
 });
 // Streamable HTTP, stateless per request. All sessions share the single atomic store.
 app.post('/mcp', async (req, res, next) => {
-  const server = createMcpServer(ops, (tool, ok, detail) => store.log(tool, ok, detail));
+  const server = createMcpServer(ops, tasks, (tool, ok, detail) => store.log(tool, ok, detail));
   const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
   res.on('close', () => { void transport.close(); void server.close(); });
   try { await server.connect(transport); await transport.handleRequest(req, res, req.body); }

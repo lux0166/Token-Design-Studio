@@ -1,0 +1,9 @@
+# Workflow evaluation
+
+The cases.json fixtures are synthetic, with supplied direction and product boundaries. They contain no private student data or real user interview answers. Behavioral scenarios distinguish interview requirements from implemented server gates.
+
+`node scripts/evaluate-workflow.mjs` prepares the eight-cell matrix without starting an AI session. `node scripts/evaluate-workflow.mjs --run` explicitly runs both clients with their defaults, a 200-second process limit and isolated fixture directories. Codex uses ephemeral sessions and an isolated temporary authentication copy (removed afterward); Antigravity uses its existing account permissions. No client config or permission rule is changed. Baseline source is pinned to commit c3e8142 / workflow 1.2.0; candidate source is the current workflow 1.3.0. Raw logs, prompts, hashes, prototypes and records stay under ignored output/evaluations/matrix.
+
+The constrained harness supplies guide content and asks for standalone HTML/CSS/JS, with no external assets or commands. This permits a limited composition/reporting comparison despite headless command restrictions. It does not establish installed skill discovery, native IDE/app compatibility, shadcn registry reuse, production integration, or agent browser verification. Output stays marked generated-awaiting-render-review until actually inspected. A successful process exit without usable output is not a passing evaluation.
+
+Use the same client/model configuration within each baseline/candidate pair. Record the actual model when available in logs; do not infer a model from a successful exit. Render and inspect outputs at matching dimensions, exercise primary controls and narrow layout, and record defects and limits in REPORT.md. Do not derive a beauty score or claim independent human acceptance.
