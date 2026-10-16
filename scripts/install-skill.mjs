@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const source = fileURLToPath(new URL('../skills/token-studio-shadcn/', import.meta.url));
 const target = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'skills', 'token-studio-shadcn');
-const files = ['SKILL.md', 'references/interview.md', 'references/reuse.md', 'references/handoff.md', 'agents/openai.yaml'];
+const files = ['SKILL.md', 'references/interview.md', 'references/reuse.md', 'references/design-quality.md', 'references/handoff.md', 'agents/openai.yaml'];
 // Preflight every file before writing anything. Never overwrite a customized skill.
 for (const file of files) {
   const destination = join(target, file);

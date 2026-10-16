@@ -1,6 +1,6 @@
 ---
 name: token-studio-shadcn
-description: Interview users to resolve intent and write a testable specification, then design and implement shadcn/ui screens with Token Studio, component reuse and browser verification. Use for new screens, design-to-code, UI refinement, or grill me / interview-to-spec requests.
+description: Interview users to resolve intent, specify deliberate design direction, and build shadcn/ui screens with Token Studio, component reuse and evidence-led critical review. Use for new screens, design-to-code, UI refinement, anti-slop design quality, critique, or grill me / interview-to-spec requests.
 ---
 
 # Token Studio: design and ship with shadcn/ui
@@ -8,6 +8,8 @@ description: Interview users to resolve intent and write a testable specificatio
 Use a consistent path from the user's task to working UI: **brief → interview → reuse → spec → build → verify → handoff**. Interview to resolve user intent before dependent implementation; do not turn guesses into requirements. Scale depth to the task: an explicit token correction needs no generic questionnaire, while an ambiguous new product needs discovery. Continue through implementation and verification when the user requested a build. In explicit **grill-me** mode, deliver the specification and stop before implementation.
 
 Token Studio owns the theme, locks and change history. The target repository owns application code. A shadcn registry provides components and blocks. Use each source for its real capability; Token Studio does not supply a component registry or a Figma bridge.
+
+For design work, read [references/design-quality.md](references/design-quality.md). Self-review the direction before dependent UI code and critique the actual render before handoff. When new UI has no clear brand/reference, propose two concise, meaningfully different directions with reasons and ask the human to choose; do not interpret silence as a choice. A clear reference, prior choice or explicit bounded delegation removes that interview gap. Do not add a human approval round for an already resolved direction. For an explicit critique-only request, deliver findings without unrequested code changes.
 
 ## 1. Read the context before asking
 
@@ -47,6 +49,8 @@ For an existing design or screenshot, inspect the actual reference and assets. R
 
 For new UI, define those decisions using the project's system and the interview specification. Use the project's design artifact format, or a concise DESIGN.md alongside SPEC.md when no convention exists. Include desktop and mobile behavior plus empty, loading, error, success, hover, focus and disabled states where relevant. Keep product requirements separate from agent implementation decisions made within the confirmed or delegated boundaries. Use available reference/mockup tools when the project workflow calls for them; an unrelated tool subscription is not a prerequisite.
 
+Explain the chosen information priority, composition, density, typography and major section roles using the product's task and content. A theme or installed block is a starting point, not a complete design rationale. Apply the before-code self-review in the quality guide; record ready/revise/needs an answer and resolve relevant gaps before dependent code. Preserve conventional controls and explicit brand/reference choices. Treat generic-pattern warning signs contextually, not as blanket style bans.
+
 Tie every visual role to semantic tokens (background/foreground, card/card-foreground, primary/primary-foreground, border/input/ring, and so on). Color, font, radius and spacing should have a defined source. Avoid arbitrary one-off values that contradict the contract; exact reference geometry can be documented when the token scale cannot represent it.
 
 If token edits are needed, read get_system immediately before each batch and use the returned revision for update_tokens. Change only the intended fields. On a stale revision, reread and reconcile instead of overwriting newer work. On a lock error, report the blocked field and continue unrelated work; never attempt to unlock it through another route. Do not silently pick a different design system.
@@ -75,6 +79,8 @@ Use a real browser. Exercise the primary user journey, keyboard navigation, form
 
 For visual comparison, render at the reference viewport and capture a screenshot. Compare layout/geometry, typography, spacing, colors, borders/radii/shadows, assets/icons, copy and states. Measure the relevant DOM/computed styles when a difference is ambiguous. Correct visible differences, capture again and record any intentional deviations or environment limits. Use an image diff if it helps; font rendering and antialiasing mean a raw pixel count is not sufficient evidence alone. Test at least one narrow viewport when a responsive screen is in scope and confirm there is no unintended horizontal overflow.
 
+For new UI as well as reference work, apply the after-render critical review in references/design-quality.md. Tie each finding to its location, observed evidence, user consequence and repair; recheck substantive repairs. Repair blockers and major issues within scope before claiming completion, and disclose external blockers. Handle minor preferences proportionately. Do not invent a beauty score, user validation or independent review; repeated cosmetic variation is not evidence of improvement.
+
 Do not declare pixel-perfect or production-ready solely because the build passed. If meaningful visual differences, missing states, fake integrations or failed checks remain, describe them and continue repairs that are within scope. A blocked external service does not require abandoning independent local verification.
 
 Gate: acceptance criteria and the main flow pass; visual evidence is captured at stated dimensions; unresolved issues are explicitly identified.
@@ -87,4 +93,4 @@ Deploy, publish, merge, send messages or modify external services only within th
 
 ## MCP entry points
 
-On a client that supports them, get_workflow returns this process, interview guide and relevant mode guidance. design_and_ship is the implementation prompt; grill_me is the interview-to-spec prompt. Use mode="grill-me" for interview only. Resources: token-studio://workflow, token-studio://workflow/interview, token-studio://workflow/reuse and token-studio://workflow/handoff. If Token Studio is not connected, use this skill with the target project's existing tokens and clearly report that no Token Studio synchronization was performed. If the client only exposes tools, get_workflow is sufficient to read all guides; prompt/resource support is optional.
+On a client that supports them, get_workflow returns this process, interview guide, designQualityGuide and relevant mode guidance. design_and_ship is the implementation prompt; grill_me is the interview-to-spec prompt. Use mode="grill-me" for interview only. Resources: token-studio://workflow, token-studio://workflow/interview, token-studio://workflow/reuse, token-studio://workflow/design-quality and token-studio://workflow/handoff. If Token Studio is not connected, use this skill with the target project's existing tokens and clearly report that no Token Studio synchronization was performed. If the client only exposes tools, get_workflow is sufficient to read all guides; prompt/resource support is optional.

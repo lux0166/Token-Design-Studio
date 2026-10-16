@@ -34,7 +34,7 @@ export function createMcpServer(ops: AgentOperations, log?: (tool: string, ok: b
   const write = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
   const id = z.string().uuid().describe('ID from list_systems');
   server.registerTool('get_workflow', {
-    description: 'Start here for shadcn/ui tasks: get the context, adaptive grill-me interview, testable specification, component reuse, build, browser verification and handoff workflow. Use mode=grill-me for interview-to-spec only. Returns guides; does not interview or build by itself.',
+    description: 'Start here for shadcn/ui tasks: get adaptive interview, specification, design direction, component reuse, mandatory plan/render self-review, build, verification and handoff guides. Use mode=grill-me for interview-to-spec only. Returns instructions; does not run an interview or enforce design quality.',
     inputSchema: { mode: z.enum(workflowModes).default('design-and-build') }, annotations: read,
   }, wrap('get_workflow', a => getWorkflow(a.mode)));
   server.registerTool('list_systems', { description: 'List local design systems and current workspace revision.', annotations: read }, wrap('list_systems', () => ops.list()));
@@ -54,6 +54,7 @@ export function createMcpServer(ops: AgentOperations, log?: (tool: string, ok: b
     ['design-workflow', workflowResources.instructions, guide.instructions],
     ['interview-to-spec', workflowResources.interview, guide.interviewGuide],
     ['component-reuse', workflowResources.reuse, guide.reuseGuide],
+    ['design-quality', workflowResources.designQuality, guide.designQualityGuide],
     ['delivery-evidence', workflowResources.handoff, guide.handoffTemplate],
   ]) {
     server.registerResource(name, uri, { description: `Token Studio ${name} guide`, mimeType: 'text/markdown' }, async requested => ({ contents: [{ uri: requested.href, text, mimeType: 'text/markdown' }] }));

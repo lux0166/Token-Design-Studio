@@ -35,11 +35,16 @@ Sau đó mở **http://127.0.0.1:4318**. Có thể dùng `Start Token Studio.cmd
 - Xuất CSS Tailwind v4 / shadcn/ui và snapshot JSON; nhập JSON thành hệ thống mới.
 - Tính WCAG contrast cho 7 cặp chữ/nền theo AA 4.5:1 và AAA 7:1; liệt kê cặp không đạt trước.
 - HTTP MCP, adapter stdio, resource workspace và nhật ký 100 lời gọi gần nhất.
-- Quy trình Design & Ship bảy bước, skill Codex, tool `get_workflow`, hai prompt `grill_me` / `design_and_ship` và bốn resource hướng dẫn.
+- Quy trình Design & Ship bảy bước, skill Codex, tool `get_workflow`, hai prompt `grill_me` / `design_and_ship` và năm resource hướng dẫn.
+- Định hướng thiết kế theo tác vụ; tự kiểm tra trước code và phản biện bản render có bằng chứng. Hướng dẫn chất lượng có trong skill, MCP và file tải từ editor.
 
 ## Quy trình làm việc cho agent
 
 Agent làm việc theo bảy bước: **Đọc bối cảnh → Grill me / phỏng vấn → Kiểm kê & tái sử dụng → Hoàn thiện đặc tả → Triển khai → Kiểm chứng → Bàn giao**. Mỗi bước có đầu ra và điều kiện hoàn thành. Quy trình ưu tiên component đã cài, block phù hợp từ registry chính thức/của dự án, rồi mới xây phần còn thiếu. Các API, item ID và giấy phép phải được kiểm tra khi dùng; không cần mua ProBlocks.
+
+Từ workflow **1.2.0**, hai mốc tự kiểm tra là bắt buộc trong hướng dẫn: phản biện hướng thiết kế trước code và đánh giá bản render trước bàn giao. Nếu thiết kế mới chưa có thương hiệu hoặc tham chiếu rõ, agent đề xuất **hai hướng ngắn, khác biệt và có lý do**, rồi hỏi người dùng chọn, trừ khi đã được giao quyền quyết định. Khi hướng đã rõ, agent tiếp tục trong phạm vi được yêu cầu, không thêm vòng xin duyệt. Sửa token nhỏ, dựng theo ảnh và tinh chỉnh sản phẩm hiện có dùng quy trình tương xứng.
+
+Hợp đồng thiết kế nêu ưu tiên nội dung, bố cục, mật độ, typography và mỗi section giúp người dùng hiểu/quyết định/làm gì. Review sau render ghi vị trí, bằng chứng quan sát được, ảnh hưởng, mức độ, cách sửa và kết quả kiểm tra lại. Sửa lỗi chặn tác vụ và vấn đề lớn trong phạm vi trước khi tuyên bố hoàn tất; nêu rõ giới hạn bên ngoài. Không cấm tuyệt đối card, gradient, font hay màu phổ biến; không dùng điểm "AI slop" tùy ý hoặc ép thiết kế phải lạ. Xem [hướng dẫn thiết kế & phản biện](skills/token-studio-shadcn/references/design-quality.md) và [nghiên cứu](docs/design-quality/RESEARCH.md).
 
 Bốn chế độ: `grill-me` (phỏng vấn và tạo đặc tả), `design-and-build` (xây mới), `replicate` (dựng theo tham chiếu), `refine` (sửa giao diện hiện tại). Các chế độ triển khai cũng phỏng vấn khi còn quyết định quan trọng chưa rõ. Kiểm chứng riêng độ khớp thiết kế và hành vi; không tuyên bố pixel-perfect, production-ready, tăng tốc 10x hoặc tăng conversion khi chưa có bằng chứng.
 
@@ -64,7 +69,7 @@ phỏng vấn các điểm quan trọng chưa rõ, tạo SPEC.md,
 chốt thiết kế có thông số, triển khai và kiểm chứng bằng trình duyệt.
 ```
 
-Để chỉ phỏng vấn: `$token-studio-shadcn Grill me về ý tưởng [mô tả]. Hỏi để làm rõ rồi tạo SPEC.md, chưa viết code.` Với client MCP khác, gọi `get_workflow` với `mode: "grill-me"` hoặc chọn prompt `grill_me` với `task`. Triển khai đầy đủ dùng `design_and_ship` với `task` và `mode`. Initialize response cũng hướng dẫn agent đọc quy trình. Resource gồm `token-studio://workflow`, `token-studio://workflow/interview`, `token-studio://workflow/reuse`, `token-studio://workflow/handoff`. Adapter stdio chuyển tiếp cả prompts và resources giống HTTP.
+Để chỉ phỏng vấn: `$token-studio-shadcn Grill me về ý tưởng [mô tả]. Hỏi để làm rõ rồi tạo SPEC.md, chưa viết code.` Với client MCP khác, gọi `get_workflow` với `mode: "grill-me"` hoặc chọn prompt `grill_me` với `task`. Triển khai đầy đủ dùng `design_and_ship` với `task` và `mode`. Initialize response cũng hướng dẫn agent đọc quy trình. Resource gồm `token-studio://workflow`, `token-studio://workflow/interview`, `token-studio://workflow/reuse`, `token-studio://workflow/design-quality`, `token-studio://workflow/handoff`. `get_workflow` trả thêm `designQualityGuide`; adapter stdio chuyển tiếp prompts và resources giống HTTP. File tải từ editor gồm toàn bộ hướng dẫn, giữ chỉ dẫn kết thúc ở SPEC.md cho chế độ grill-me.
 
 Đây là hướng dẫn cho agent, không phải cơ chế cưỡng chế thực thi. Client có thể không hiển thị prompts/resources; tool `get_workflow` vẫn đọc được toàn bộ quy trình. Nếu không có MCP Token Studio, skill có thể dùng token của dự án và phải nói rõ chưa đồng bộ với editor. Việc deploy/publish vẫn tuân theo phạm vi người dùng đã cho phép.
 

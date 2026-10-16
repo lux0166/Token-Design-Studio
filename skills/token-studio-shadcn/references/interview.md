@@ -40,6 +40,8 @@ This is a coverage map, not a questionnaire to paste in one message:
 
 For a narrow change, cover only its affected decisions. Keep confirmed repository conventions without asking the human to choose a framework again. Use existing design tokens for routine visual choices unless a new direction is requested. If the human delegates design or technical choices, make bounded decisions and record the delegation; business-policy decisions remain open unless also delegated.
 
+For new UI with no clear brand or reference, use the quality guide linked from SKILL.md: propose two short, meaningfully different directions, explain task fit/tradeoffs and ask which to pursue before dependent UI code. Do not ask abstract taste questions when concrete alternatives would clarify the choice. Preserve a clear reference, prior selection or explicit bounded delegation instead of repeating the choice. Direction self-review and rendered critique are mandatory agent checkpoints, not automatic human approval requests.
+
 ### Example: English 1–1 learning platform
 
 If the user already chose administrator + teacher, do not ask that again. Useful next branches might be:

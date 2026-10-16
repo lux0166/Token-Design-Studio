@@ -6,10 +6,11 @@ const skillDirectory = new URL('../skills/token-studio-shadcn/', import.meta.url
 const instructions = readFileSync(new URL('SKILL.md', skillDirectory), 'utf8');
 const interviewGuide = readFileSync(new URL('references/interview.md', skillDirectory), 'utf8');
 const reuseGuide = readFileSync(new URL('references/reuse.md', skillDirectory), 'utf8');
+const designQualityGuide = readFileSync(new URL('references/design-quality.md', skillDirectory), 'utf8');
 const handoffTemplate = readFileSync(new URL('references/handoff.md', skillDirectory), 'utf8');
 export function getWorkflow(mode: WorkflowMode = 'design-and-build'): WorkflowGuide {
   if (!workflowModes.includes(mode)) throw new Error('Workflow mode không hợp lệ.');
-  return { version: workflowVersion, mode, phases: workflowPhases, instructions, interviewGuide, reuseGuide, handoffTemplate, modeInstructions: modeInstructions[mode], resources: workflowResources };
+  return { version: workflowVersion, mode, phases: workflowPhases, instructions, interviewGuide, reuseGuide, designQualityGuide, handoffTemplate, modeInstructions: modeInstructions[mode], resources: workflowResources };
 }
 export function workflowPrompt(task: string, mode: WorkflowMode = 'design-and-build') {
   const guide = getWorkflow(mode);
@@ -20,6 +21,7 @@ export function workflowPrompt(task: string, mode: WorkflowMode = 'design-and-bu
     guide.instructions,
     'Interview and specification reference:\n' + guide.interviewGuide,
     'Component/block reuse reference:\n' + guide.reuseGuide,
+    'Design direction and critical review reference:\n' + guide.designQualityGuide,
     'Delivery reference:\n' + guide.handoffTemplate,
     mode === 'grill-me'
       ? 'Begin with existing context and the highest-impact unanswered question. Interview adaptively, write SPEC.md from actual answers, and stop at the specification. Do not implement the product in this mode.'

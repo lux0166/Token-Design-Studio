@@ -1,13 +1,14 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { request as httpRequest } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { formatWorkflowGuide } from '../shared/workflow.js';
 
 test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, concurrency and export', { timeout: 30000 }, async t => {
   const dir = mkdtempSync(join(tmpdir(), 'token-studio-mcp-'));
@@ -37,9 +38,14 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const workflow = JSON.parse((await call('get_workflow', { mode: 'replicate' })).data);
   assert.equal(workflow.mode, 'replicate');
   assert.equal(workflow.phases.length, 7);
-  assert.equal(workflow.version, '1.1.0');
+  assert.equal(workflow.version, '1.2.0');
   assert.ok(workflow.phases.some((phase: { id: string }) => phase.id === 'interview'));
   assert.match(workflow.interviewGuide, /SPEC.md/);
+  assert.equal(workflow.designQualityGuide, readFileSync(resolve('skills/token-studio-shadcn/references/design-quality.md'), 'utf8'));
+  const qualityResource = await client.readResource({ uri: workflow.resources.designQuality });
+  assert.ok('text' in qualityResource.contents[0]);
+  assert.equal(qualityResource.contents[0].text, workflow.designQualityGuide);
+  assert.ok(formatWorkflowGuide(workflow).includes(workflow.designQualityGuide));
   assert.equal((await state()).revision, beforeWorkflow.revision);
   assert.deepEqual((await state()).systems, beforeWorkflow.systems);
   const workflowResource = await client.readResource({ uri: 'token-studio://workflow' });
@@ -60,6 +66,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   if (grillPrompt.messages[0].content.type === 'text') {
     assert.ok(grillPrompt.messages[0].content.text.includes(grillWorkflow.modeInstructions));
     assert.ok(grillPrompt.messages[0].content.text.includes(workflow.interviewGuide));
+    assert.ok(grillPrompt.messages[0].content.text.includes(workflow.designQualityGuide));
     assert.match(grillPrompt.messages[0].content.text, /Do not implement the product in this mode/);
   }
   assert.equal((await state()).revision, beforeWorkflow.revision);
@@ -71,6 +78,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
     assert.ok(prompt.messages[0].content.text.includes(workflow.modeInstructions));
     assert.ok(prompt.messages[0].content.text.includes(workflow.instructions));
     assert.ok(prompt.messages[0].content.text.includes(workflow.interviewGuide));
+    assert.ok(prompt.messages[0].content.text.includes(workflow.designQualityGuide));
   }
   assert.equal((await call('get_workflow', { mode: 'invalid-mode' })).error, true);
   await assert.rejects(() => client.getPrompt({ name: 'design_and_ship', arguments: { task, mode: 'invalid-mode' } }));
@@ -93,7 +101,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const preview = await call('import_css', { systemId: id, css: ':root { --radius: 1rem; }', apply: false }); assert.equal(JSON.parse(preview.data).applied, false); assert.equal((await state()).systems[0].settings.radius, 12);
   const apply = await call('import_css', { systemId: id, css: ':root { --radius: 1rem; }', apply: true, expectedRevision: (await state()).revision }); assert.ok(!apply.error, apply.data); assert.equal((await state()).systems[0].settings.radius, 16);
   const resources = await client.listResources(); assert.ok(resources.resources.some(resource => resource.uri === 'token-studio://workspace'));
-  assert.equal(resources.resources.length, 6);
+  assert.equal(resources.resources.length, 7);
   const catalogList = JSON.parse((await call('list_themes', { query: 'cyber' })).data);
   assert.equal(catalogList.themes.length, 1);
   assert.equal(catalogList.themes[0].id, 'tweakcn:cyberpunk');
@@ -141,6 +149,10 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   assert.deepEqual(stdioPrompt, prompt);
   const stdioResource = await stdio.readResource({ uri: 'token-studio://workflow' });
   assert.deepEqual(stdioResource, workflowResource);
+  assert.deepEqual(await stdio.readResource({ uri: workflow.resources.designQuality }), qualityResource);
+  const stdioWorkflow = await stdio.callTool({ name: 'get_workflow', arguments: { mode: 'replicate' } });
+  assert.ok(Array.isArray(stdioWorkflow.content) && stdioWorkflow.content[0]?.type === 'text');
+  assert.deepEqual(JSON.parse(stdioWorkflow.content[0].text as string), workflow);
   assert.deepEqual(await stdio.getPrompt({ name: 'grill_me', arguments: { task: 'Clarify a one-to-one learning platform.' } }), grillPrompt);
   assert.deepEqual(await stdio.readResource({ uri: 'token-studio://workflow/interview' }), interviewResource);
   const stdioTheme = await stdio.callTool({ name: 'get_theme', arguments: { themeId: 'tweakcn:cyberpunk' } });

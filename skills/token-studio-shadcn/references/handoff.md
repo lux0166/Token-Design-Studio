@@ -10,6 +10,7 @@ Use the repository's existing delivery format when it has one. Otherwise keep th
 - **Run/view:** the working command/URL or local artifact path. Describe required services without claiming unavailable integrations work.
 - **Behavior checks:** primary journey and relevant pending/error/empty/validation states; commands run and their actual results.
 - **Visual evidence:** reference and rendered screenshot paths; viewport dimensions; checked geometry, typography, spacing, colors, copy and states; fixed or accepted differences.
+- **Design quality:** chosen direction and its source; before-code ready/revise/needs-an-answer result; rendered critique findings with evidence, user impact, repairs and recheck status. Separate observed issues from preference/hypothesis; do not claim independent review or a universal aesthetic score.
 - **Limits:** failed/unavailable checks, remaining visual differences, missing external services and what is needed for release.
 - **Release state:** local implementation, PR, deployed preview or production. Cite only a state actually reached; publishing requires the human's authorization.
 
@@ -24,14 +25,18 @@ User and primary job:
 Primary CTA and success state:
 Scope and assumptions:
 Reference / viewport:
+Chosen direction / source / alternatives considered when relevant:
+Before-code self-review result and rationale:
 
 Layout and responsive rules:
+Information priority and section → user task/decision map:
 Typography / spacing / color / shape sources:
 Component/block map and provenance:
 Interactive states and data integration:
 
 Acceptance criteria:
 Verification evidence:
+Rendered critique findings / severity / repairs / recheck:
 Intentional deviations and remaining work:
 ```
 

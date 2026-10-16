@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, BookOpen, Download, ListChecks, MessagesSquare } from 'lucide-react';
-import { workflowVersion, workflowPhases, workflowStarter, type WorkflowGuide, type WorkflowMode } from '../../shared/workflow';
+import { ArrowRight, BookOpen, Download, Eye, ListChecks, MessagesSquare } from 'lucide-react';
+import { formatWorkflowGuide, workflowVersion, workflowPhases, workflowStarter, type WorkflowGuide, type WorkflowMode } from '../../shared/workflow';
 import { CopyButton, download } from './ui';
 import { request } from '../lib/useStudio';
 
@@ -23,10 +23,11 @@ export function WorkflowPanel() {
   }, [mode]);
   const interviewOnly = mode === 'grill-me';
   const starter = workflowStarter(task, mode);
-  const fullGuide = guide ? [guide.modeInstructions, guide.instructions, guide.interviewGuide, guide.reuseGuide, guide.handoffTemplate].join('\n\n---\n\n') : '';
+  const fullGuide = guide ? formatWorkflowGuide(guide) : '';
   return <section className="plain-panel workflow-panel" aria-labelledby="workflow-heading">
     <div className="workflow-heading"><div><h2 id="workflow-heading"><ListChecks /> Quy trình Design & Ship</h2><p>Đọc bối cảnh, hỏi rõ ý định, tạo đặc tả rồi triển khai theo hệ thống.</p></div><span className="workflow-version">v{workflowVersion}</span></div>
     <div className="interview-intro"><span><MessagesSquare /></span><div><h3>Grill me — hỏi rõ rồi mới xây.</h3><p>Agent hỏi từng vòng ngắn, đào sâu vào câu trả lời và làm rõ mâu thuẫn. Những điều bạn đã xác nhận được giữ lại; câu hỏi quan trọng còn mở sẽ được giải quyết trước khi viết code phụ thuộc.</p><div className="interview-outcomes"><span>Quyết định có nguồn</span><span>Quy tắc & ngoại lệ</span><span>SPEC.md + tiêu chí nghiệm thu</span></div></div></div>
+    <div className="interview-intro"><span><Eye /></span><div><h3>Định hướng có lý do, phản biện có bằng chứng.</h3><p>Thiết kế mới chưa có hướng rõ: agent đề xuất hai phương án ngắn để bạn chọn. Khi hướng đã rõ, agent tự kiểm tra trước code và phản biện bản render sau code, sửa vấn đề quan trọng rồi kiểm tra lại.</p><div className="interview-outcomes"><span>Bố cục phục vụ tác vụ</span><span>Giữ thương hiệu & tham chiếu</span><span>Không chấm điểm đẹp tùy ý</span></div></div></div>
     <ol className="workflow-phases">{workflowPhases.map((phase, i) => <li key={phase.id}><span className="workflow-step-number">0{i + 1}</span><div><h3>{phase.title}</h3><p>{phase.description}</p><small><ArrowRight />{phase.deliverable}</small></div></li>)}</ol>
     <div className="workflow-task">
       <label htmlFor="workflow-mode">Loại công việc</label>
@@ -34,7 +35,7 @@ export function WorkflowPanel() {
       <p className="workflow-mode-help">{interviewOnly ? 'Chế độ này kết thúc ở SPEC.md. Agent phỏng vấn trong cuộc trò chuyện của client AI bạn đang dùng.' : 'Phỏng vấn các điểm còn thiếu trước khi triển khai. Khi đã đủ đặc tả, agent tiếp tục công việc bạn đã yêu cầu.'}</p>
       <label htmlFor="workflow-task">Nhiệm vụ hoặc ý tưởng cần làm rõ</label>
       <textarea id="workflow-task" value={task} maxLength={6000} rows={3} onChange={e => setTask(e.target.value)} />
-      <div className="workflow-controls"><CopyButton disabled={!task.trim()} value={starter} label={interviewOnly ? 'Sao chép yêu cầu phỏng vấn' : 'Sao chép yêu cầu cho agent'} /><button className="button" disabled={!guide} onClick={() => download(interviewOnly ? 'token-studio-grill-me.md' : 'token-studio-design-and-ship.md', interviewOnly ? `${guide!.modeInstructions}\n\n${guide!.interviewGuide}` : fullGuide, 'text/markdown')}><Download />{interviewOnly ? 'Tải hướng dẫn phỏng vấn' : 'Tải hướng dẫn'}</button></div>
+      <div className="workflow-controls"><CopyButton disabled={!task.trim()} value={starter} label={interviewOnly ? 'Sao chép yêu cầu phỏng vấn' : 'Sao chép yêu cầu cho agent'} /><button className="button" disabled={!guide} onClick={() => download(interviewOnly ? 'token-studio-grill-me.md' : 'token-studio-design-and-ship.md', fullGuide, 'text/markdown')}><Download />{interviewOnly ? 'Tải hướng dẫn phỏng vấn' : 'Tải hướng dẫn'}</button></div>
     </div>
     {error && <p role="alert" className="error-message">{error}</p>}
     <details className="workflow-details"><summary><BookOpen /> Đọc toàn bộ hướng dẫn agent</summary>{guide ? <pre>{fullGuide}</pre> : <p>{error || 'Đang tải hướng dẫn…'}</p>}</details>
