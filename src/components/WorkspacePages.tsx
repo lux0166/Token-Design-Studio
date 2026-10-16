@@ -9,7 +9,7 @@ export function OverviewPage({ systems, onSelect, onCreate, onMcp }: { systems: 
   return <div className="workspace-page"><div className="page-heading"><div><h1>Không gian của bạn.</h1><p>Từ ý tưởng đến một hệ thống nhất quán.</p></div><button className="button dark" onClick={onCreate}><Plus /> Tạo design system</button></div><div className="overview-intro"><div><span className="overview-symbol"><Layers /></span><h2>Thiết kế tự do.<br />Làm chủ từng chi tiết.</h2><p>Token, thành phần và agent cùng làm việc trên một hệ thống. Lưu cục bộ, luôn thuộc về bạn.</p><button className="text-button" onClick={onMcp}>Kết nối agent của bạn <ArrowUpRight /></button></div><div className="overview-token-art" aria-hidden="true">{['#18794E', '#55B58C', '#A7F3D0', '#D8EEE2', '#EEF7F1'].map((color, i) => <span key={color} style={{ background: color, transform: `rotate(${i * 10 - 20}deg) translateY(${i * 3}px)` }} />)}</div></div><div className="list-title"><h2>Design systems</h2><span>{systems.length} hệ thống</span></div><div className="overview-systems">{systems.map(s => <button key={s.id} onClick={() => onSelect(s.id)}><div className="system-mini-preview" style={{ background: s.light.background }}><span style={{ color: s.light.foreground, fontFamily: s.settings.font }}>Aa<span style={{ color: s.light.primary }}>.</span></span><div>{['primary', 'secondary', 'accent', 'foreground'].map(key => <i key={key} style={{ background: s.light[key as 'primary'], borderRadius: s.settings.radius / 2 }} />)}</div></div><div className="system-card-title"><strong>{s.name}</strong><ArrowUpRight /></div><p>{tokenNames.length * 2} màu · {s.settings.font} · {s.settings.radius}px</p><small>Cập nhật {new Date(s.updatedAt).toLocaleDateString('vi-VN')}</small></button>)}</div><div className="ownership-note"><Database /><div><strong>Không thuê bao. Không giới hạn số lần chỉnh sửa.</strong><p>Ứng dụng chạy trên máy của bạn. Agent sử dụng gói AI mà bạn đang có.</p></div></div></div>;
 }
 
-interface ServerStatus { status: string; version: string; endpoint: string; dataFile: string; root: string; tools: number }
+interface ServerStatus { status: string; version: string; endpoint: string; dataFile: string; root: string; tools: number; stdio: { command: string; args: string[] } }
 export function McpPage({ calls, online }: { calls: StudioState['calls']; online: boolean }) {
   const [status, setStatus] = useState<ServerStatus | null>(null);
   const [client, setClient] = useState('codex');
@@ -19,7 +19,7 @@ export function McpPage({ calls, online }: { calls: StudioState['calls']; online
     codex: `codex mcp add token-studio --url ${endpoint}`,
     claude: `claude mcp add --transport http token-studio ${endpoint}`,
     cursor: JSON.stringify({ mcpServers: { 'token-studio': { url: endpoint } } }, null, 2),
-    desktop: JSON.stringify({ mcpServers: { 'token-studio': { command: 'node', args: [status ? `${status.root.replaceAll('\\', '/')}/node_modules/tsx/dist/cli.mjs` : '/path/to/token-studio/node_modules/tsx/dist/cli.mjs', status ? `${status.root.replaceAll('\\', '/')}/server/stdio.ts` : '/path/to/token-studio/server/stdio.ts'] } } }, null, 2),
+    desktop: JSON.stringify({ mcpServers: { 'token-studio': { command: status?.stdio.command ?? 'node', args: status?.stdio.args ?? ['/path/to/token-design-studio/runtime/stdio.js'], env: { STUDIO_MCP_URL: endpoint } } } }, null, 2),
   };
   const tools = [
     ['get_workflow', 'Phỏng vấn → đặc tả → thiết kế → code và kiểm chứng', 'Đọc'],
@@ -50,4 +50,3 @@ export function HistoryPage({ system, travel, pending }: { system: DesignSystem;
     return <section key={entry.id} className={`history-entry ${applied ? '' : 'undone'}`}><span className="timeline-dot">{entry.source === 'agent' ? <Sparkles /> : <Check />}</span><div className="history-entry-heading"><div><h3>{entry.summary}</h3><span>{entry.source === 'agent' ? 'MCP agent' : 'Bạn'} <span>·</span> {new Date(entry.at).toLocaleString('vi-VN')}</span></div><span className={`history-status ${applied ? '' : 'reverted'}`}>{applied ? 'Đã áp dụng' : 'Đã hoàn tác'}</span></div><div className="history-changes">{changes.map(change => <div key={change.path}><code>{change.path}</code><span>{/^#[0-9A-F]{6}$/i.test(change.before) && <i style={{ background: change.before }} />}{change.before}</span><ArrowRight /><span>{/^#[0-9A-F]{6}$/i.test(change.after) && <i style={{ background: change.after }} />}{change.after}</span></div>)}</div></section>;
   }).reverse()}</div>}</div>;
 }
-

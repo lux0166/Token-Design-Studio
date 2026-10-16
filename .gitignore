@@ -10,3 +10,5 @@ output/playwright/
 output/
 .DS_Store
 Thumbs.db
+runtime/
+*.tgz

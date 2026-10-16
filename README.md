@@ -1,8 +1,37 @@
-# Token Studio
+# Token Design Studio
 
 Trình quản lý design system chạy local, có editor tiếng Việt và MCP server thật. Bạn sở hữu mã nguồn và dữ liệu, không cần tài khoản hoặc thuê bao Token Studio.
 
-## Chạy ứng dụng
+## Cài và chạy gói npm local
+
+Yêu cầu Node.js 22.12+ và npm. Bản 0.2.0 được chuẩn bị dưới dạng `.tgz`, **chưa phát hành lên npm registry**. Tải hoặc lấy file `output/npm/token-design-studio-0.2.0.tgz` rồi chạy trong thư mục chứa file:
+
+```powershell
+npm install -g ./token-design-studio-0.2.0.tgz
+token-design-studio
+```
+
+Lệnh mở editor tại **http://127.0.0.1:4318** và HTTP MCP tại **http://127.0.0.1:4318/mcp**. Giữ terminal mở; Ctrl+C để dừng. Gói đã chứa editor và runtime build sẵn; máy sử dụng không cần Git, Vite, TypeScript hoặc bước build. Không có script postinstall tự sửa máy. Có thể dùng tarball không cài global: `npm exec --yes --package=./token-design-studio-0.2.0.tgz -- token-design-studio`.
+
+Kết nối Codex một lần, sau khi đã cài Codex CLI:
+
+```powershell
+token-design-studio setup codex
+```
+
+Setup cài skill và dùng lệnh chính thức `codex mcp add` để đăng ký HTTP MCP. Mở phiên Codex mới để tải cấu hình/skill; Studio cần đang chạy khi agent gọi MCP. Adapter stdio: `token-design-studio mcp`. Chưa có daemon hoặc dịch vụ autostart ngầm.
+
+Các lệnh khác: `token-design-studio --help`, `install-skill`, `doctor`, `--no-open`, `--port 4319`, `--data-dir "đường dẫn"`. Một phiên tương thích cùng dữ liệu/phiên bản được tái sử dụng; khác kho hoặc khác phiên bản sẽ được thông báo. Port của ứng dụng khác không bị chiếm. Khóa dữ liệu ngăn hai server cùng ghi một kho kể cả khác port; sau khi tiến trình bị kết thúc đột ngột, khóa có thể cần khoảng 10 giây để hết hạn.
+
+Dữ liệu CLI mặc định nằm tại `%LOCALAPPDATA%/TokenDesignStudio/studio.json` trên Windows, `~/Library/Application Support/TokenDesignStudio/studio.json` trên macOS, hoặc `$XDG_DATA_HOME/token-design-studio/studio.json` (mặc định `~/.local/share/...`) trên Linux. Không lưu trong package hoặc cache npm; nâng cấp/cài lại không ghi đè dữ liệu.
+
+Để chuyển dữ liệu từ repo cũ, dừng phiên cũ, chạy `token-design-studio migrate "đường dẫn repo/data/studio.json"` trước lần khởi động CLI đầu tiên. Lệnh kiểm tra dữ liệu, giữ nguyên nguồn và từ chối ghi đè kho đích đã tồn tại. Hoặc dùng `--data-dir "đường dẫn repo/data"` để tiếp tục dùng trực tiếp kho cũ. Repo phát triển vẫn dùng `data/studio.json` như trước, không tự di chuyển dữ liệu.
+
+Skill cài bởi CLI được theo dõi bằng hash: cập nhật bản được quản lý chưa chỉnh riêng có sao lưu; file đã chỉnh riêng hoặc bản cũ khác nội dung nhưng chưa được quản lý sẽ yêu cầu đối chiếu, không tự ghi đè. Setup sao lưu cấu hình Codex trước khi thay; giữ cấu hình khác. Nếu tên MCP `token-studio` đã có cấu hình khác, mặc định dừng; `setup codex --replace-mcp` cho phép thay riêng kết nối đó có chủ đích.
+
+Sau khi có một bản phát hành npm công khai, lệnh hướng tới là `npx token-design-studio@latest`. Hiện hãy dùng tarball; package vẫn đặt `private: true` để ngăn publish ngoài ý muốn. Phát hành công khai là bước riêng.
+
+## Phát triển từ mã nguồn
 
 Yêu cầu Node.js 22.12+ (đã kiểm tra bằng Node 24), npm và một trình duyệt hiện đại.
 
@@ -21,6 +50,8 @@ npm start
 ```
 
 Sau đó mở **http://127.0.0.1:4318**. Có thể dùng `Start Token Studio.cmd` trên Windows để tự cài dependency còn thiếu, build và mở ứng dụng. Đóng terminal để dừng.
+
+Tạo và kiểm tra tarball bằng `npm run pack:local`, sau đó `npm run test:package`. Bộ kiểm tra cài tarball với `--omit=dev --ignore-scripts` trong thư mục sạch, dùng kho dữ liệu và CODEX_HOME tạm. Xem [đặc tả phân phối](docs/npm-cli/SPEC.md).
 
 ## Có gì trong bản đầu
 

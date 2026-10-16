@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { patchSchema, type SystemPatch } from '../shared/model.js';
 import { agentInstructions, workflowModes, workflowResources } from '../shared/workflow.js';
 import { getWorkflow, workflowPrompt } from './workflow.js';
+import { appVersion } from './version.js';
 import { themeCatalog, getCatalogTheme, filterThemes, catalogSource } from '../shared/themes.js';
 
 export interface AgentOperations {
@@ -16,7 +17,7 @@ export interface AgentOperations {
   import(id: string, css: string, apply: boolean, expectedRevision?: number): unknown | Promise<unknown>;
 }
 export function createMcpServer(ops: AgentOperations, log?: (tool: string, ok: boolean, detail: string) => void) {
-  const server = new McpServer({ name: 'token-studio', version: '0.1.0' }, {
+  const server = new McpServer({ name: 'token-studio', version: appVersion }, {
     instructions: agentInstructions,
   });
   const wrap = (name: string, fn: (args: any) => unknown | Promise<unknown>) => async (args: any) => {

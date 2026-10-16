@@ -1,8 +1,10 @@
 import express from 'express';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
-import { resolve, dirname } from 'node:path';
-import { existsSync } from 'node:fs';
+import { resolve, dirname, basename } from 'node:path';
+import { existsSync, mkdirSync, realpathSync } from 'node:fs';
+import lockfile from 'proper-lockfile';
+import { appVersion as version } from './version.js';
 import { spawn } from 'node:child_process';
 import { z } from 'zod';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -18,7 +20,12 @@ import { getCatalogTheme, prepareThemeApplication, themeCatalog, ThemeCatalogErr
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT ?? 4318);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT không hợp lệ');
-const store = new StudioStore(process.env.STUDIO_DATA_FILE ?? resolve(projectRoot, 'data/studio.json'));
+const requestedDataFile = resolve(process.env.STUDIO_DATA_FILE ?? resolve(projectRoot, 'data/studio.json'));
+mkdirSync(dirname(requestedDataFile), { recursive: true });
+const dataFile = existsSync(requestedDataFile) ? realpathSync(requestedDataFile) : resolve(realpathSync(dirname(requestedDataFile)), basename(requestedDataFile));
+const releaseLock = await lockfile.lock(dataFile, { realpath: false, retries: { retries: 24, minTimeout: 500, maxTimeout: 500, factor: 1 } });
+process.once('exit', () => { try { lockfile.unlockSync(dataFile, { realpath: false }); } catch { /* Already released or compromised. */ } });
+const store = new StudioStore(dataFile);
 const app = express();
 app.disable('x-powered-by');
 app.use(hostHeaderValidation(['127.0.0.1', 'localhost', '[::1]']));
@@ -60,7 +67,7 @@ const ops: AgentOperations = {
   },
 };
 app.get('/api/state', (_req, res) => res.json(store.read()));
-app.get('/api/status', (_req, res) => res.json({ status: 'online', version: '0.1.0', endpoint: `http://127.0.0.1:${port}/mcp`, dataFile: store.path, root: projectRoot, tools: 11, prompts: 2, themes: themeCatalog.length, workflowVersion }));
+app.get('/api/status', (_req, res) => res.json({ status: 'online', application: 'token-design-studio', protocolVersion: 1, version, endpoint: `http://127.0.0.1:${port}/mcp`, dataFile: store.path, root: projectRoot, tools: 11, prompts: 2, themes: themeCatalog.length, workflowVersion, stdio: { command: process.execPath, args: existsSync(resolve(projectRoot, 'runtime/stdio.js')) ? [resolve(projectRoot, 'runtime/stdio.js')] : [resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'), resolve(projectRoot, 'server/stdio.ts')] } }));
 app.get('/api/workflow', (req, res) => {
   const mode = z.enum(workflowModes).default('design-and-build').parse(req.query.mode);
   res.json(getWorkflow(mode));
@@ -114,6 +121,12 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
   res.status(status).json({ error: message });
 });
 const httpServer = createServer(app);
+for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => {
+  httpServer.close(() => { void releaseLock().finally(() => process.exit(0)); });
+  setTimeout(() => httpServer.closeAllConnections(), 2000).unref();
+});
+await new Promise<void>((ready, reject) => {
+httpServer.once('error', reject);
 httpServer.listen(port, '127.0.0.1', () => {
   console.log(`Token Studio: http://127.0.0.1:${port} | MCP: http://127.0.0.1:${port}/mcp`);
   if (process.env.STUDIO_OPEN_BROWSER === '1' && process.platform === 'win32') {
@@ -121,5 +134,6 @@ httpServer.listen(port, '127.0.0.1', () => {
     opener.on('error', () => console.warn('Mở trình duyệt thủ công tại URL phía trên.'));
     opener.unref();
   }
+  ready();
 });
-httpServer.on('error', error => { console.error(error); process.exitCode = 1; });
+}).catch(async error => { await releaseLock(); throw error; });
