@@ -15,7 +15,7 @@ Date: 2026-10-16. Approved by the user's "đc triển khai đi" following the np
 
 ## Distribution and acceptance
 
-Use a files allowlist; exclude personal data, .env, tests, demo app, screenshots and development tools. No postinstall side effects. Keep private:true until a separate publication step; local pack/install remain supported.
+Use a files allowlist; exclude personal data, .env, tests, demo app, screenshots and development tools. No postinstall side effects. The owner subsequently requested removal of the npm private flag ("bỏ private đi"); it is now removed so the package can be published. GitHub repository visibility is a separate setting and is unchanged. Registry publication has not been requested by that metadata change alone.
 
 Install the real tarball with --omit=dev --ignore-scripts in a clean directory. Check executable discovery, static assets, real HTTP/stdio MCP, persistence/restart, locks, migration, skill updates and isolated Codex setup. Runtime must not require tsx/Vite/esbuild/React. Preserve existing checks and real user config/data.
 

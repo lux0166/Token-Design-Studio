@@ -5,10 +5,10 @@ Date: 2026-10-16. Environment: Windows, Node.js 24.19.0, npm 11.10.0, installed 
 ## Artifact
 
 - Local package: output/npm/token-design-studio-0.2.0.tgz.
-- 436,291 bytes compressed; 37 files; approximately 1 MB unpacked before npm installs runtime dependencies.
-- SHA-256: `2878574C4BD4F2EB7BBE719964FC6E29ED97EA18582B48705BBBF79B7A464518`.
+- 436,281 bytes compressed; 37 files; approximately 1 MB unpacked before npm installs runtime dependencies.
+- SHA-256: `DA3FBF195029CB582101C088E0F1937E0F951CCF13F82986CB1D3229DA40DEF6`.
 - Includes built editor, bundled Node entry points, CLI, skill/workflow 1.2.0, 48 theme catalog and license notices. Files allowlist excludes personal store, .env, demo app, source, screenshots, tests and development tools.
-- Remains private:true; no public npm publication or registry name reservation was performed. A local tarball install still downloads its normal runtime dependencies from npm when absent from cache.
+- The npm private flag has been removed at the owner's request. No public npm publication or registry name reservation was performed. A local tarball install still downloads its normal runtime dependencies from npm when absent from cache.
 
 ## Checks run
 
@@ -37,3 +37,9 @@ Footer version now comes from package metadata. The MCP setup page uses a server
 ## Release boundary
 
 This completes the authorized implementation and local distribution validation. Public npm publication and real user Codex setup remain separate actions. The README contains tarball install/run, setup, persistence, migration, conflict and developer build instructions.
+
+## Publication preparation update
+
+The owner subsequently requested removal of the npm private flag. Removed it with npm pkg delete private, updated the README/specification and regenerated the tarball through prepack. TypeScript, Vite and Node-runtime builds passed. Direct inspection of package/package.json in the tarball confirmed that private is absent.
+
+`npm publish ./output/npm/token-design-studio-0.2.0.tgz --dry-run --access public --registry=https://registry.npmjs.org` passed with 37 files and the artifact size above. npm warned that registry login is still required for a real publication. No real publish was run. The functional checks above were performed before this metadata-only update; they were not repeated for flag removal. GitHub repository visibility is separate and remains private.

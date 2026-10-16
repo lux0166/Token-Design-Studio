@@ -29,7 +29,7 @@ Dữ liệu CLI mặc định nằm tại `%LOCALAPPDATA%/TokenDesignStudio/stud
 
 Skill cài bởi CLI được theo dõi bằng hash: cập nhật bản được quản lý chưa chỉnh riêng có sao lưu; file đã chỉnh riêng hoặc bản cũ khác nội dung nhưng chưa được quản lý sẽ yêu cầu đối chiếu, không tự ghi đè. Setup sao lưu cấu hình Codex trước khi thay; giữ cấu hình khác. Nếu tên MCP `token-studio` đã có cấu hình khác, mặc định dừng; `setup codex --replace-mcp` cho phép thay riêng kết nối đó có chủ đích.
 
-Sau khi có một bản phát hành npm công khai, lệnh hướng tới là `npx token-design-studio@latest`. Hiện hãy dùng tarball; package vẫn đặt `private: true` để ngăn publish ngoài ý muốn. Phát hành công khai là bước riêng.
+Sau khi có một bản phát hành npm công khai, dùng `npx token-design-studio@latest`. Package đã bỏ cờ `private` theo yêu cầu của chủ dự án để cho phép phát hành. Hiện vẫn dùng tarball cho đến khi publish thành công lên registry.
 
 ## Phát triển từ mã nguồn
 
