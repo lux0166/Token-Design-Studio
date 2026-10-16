@@ -5,8 +5,8 @@ Date: 2026-10-16. Environment: Windows, Node.js 24.19.0, npm 11.10.0, installed 
 ## Artifact
 
 - Local package: output/npm/token-design-studio-0.2.0.tgz.
-- 436,281 bytes compressed; 37 files; approximately 1 MB unpacked before npm installs runtime dependencies.
-- SHA-256: `DA3FBF195029CB582101C088E0F1937E0F951CCF13F82986CB1D3229DA40DEF6`.
+- 437,301 bytes compressed; 37 files; approximately 1 MB unpacked before npm installs runtime dependencies.
+- SHA-256: `4141BADEE1CDB5A5367CD8137CC89BBC5087192BEF2E17DFEC71675C4E638696`.
 - Includes built editor, bundled Node entry points, CLI, skill/workflow 1.2.0, 48 theme catalog and license notices. Files allowlist excludes personal store, .env, demo app, source, screenshots, tests and development tools.
 - The npm private flag has been removed at the owner's request. No public npm publication or registry name reservation was performed. A local tarball install still downloads its normal runtime dependencies from npm when absent from cache.
 
@@ -42,4 +42,8 @@ This completes the authorized implementation and local distribution validation. 
 
 The owner subsequently requested removal of the npm private flag. Removed it with npm pkg delete private, updated the README/specification and regenerated the tarball through prepack. TypeScript, Vite and Node-runtime builds passed. Direct inspection of package/package.json in the tarball confirmed that private is absent.
 
-`npm publish ./output/npm/token-design-studio-0.2.0.tgz --dry-run --access public --registry=https://registry.npmjs.org` passed with 37 files and the artifact size above. npm warned that registry login is still required for a real publication. No real publish was run. The functional checks above were performed before this metadata-only update; they were not repeated for flag removal. GitHub repository visibility is separate and remains private.
+`npm publish ./output/npm/token-design-studio-0.2.0.tgz --dry-run --access public --registry=https://registry.npmjs.org` passed with 37 files before the subsequent README update. npm warned that registry login is still required for a real publication. No real publish was run. The functional checks above were performed before this metadata-only update; they were not repeated for flag removal. GitHub repository visibility is separate and remains private.
+
+## Skill-sharing README update
+
+Added a prominent standalone Codex skill installation/share section, recipient prerequisites, install location, example prompts, CLI command comparison and a local-tarball fallback. Registry commands are explicitly conditional on successful public publication. Repacked with npm pack --ignore-scripts because this update changes documentation only; existing compiled runtime/editor assets were retained. Compared package/README.md inside the tarball byte-for-byte with the source README and confirmed the npm private flag remains absent. The artifact size/checksum at the top reflects this documentation update. No new runtime tests were needed or claimed.

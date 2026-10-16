@@ -2,7 +2,61 @@
 
 Trình quản lý design system chạy local, có editor tiếng Việt và MCP server thật. Bạn sở hữu mã nguồn và dữ liệu, không cần tài khoản hoặc thuê bao Token Studio.
 
-## Cài và chạy gói npm local
+Bạn có thể cài riêng **skill thiết kế cho Codex**, hoặc dùng thêm **editor + MCP** để quản lý và đồng bộ theme.
+
+## Cài riêng skill cho Codex
+
+Yêu cầu Node.js 22.12+ với npm và Codex hỗ trợ skill local. Sau khi package được phát hành công khai lên npm, người dùng trên máy khác cài bằng một lệnh:
+
+```sh
+npx token-design-studio@latest install-skill
+```
+
+Lệnh tải package và cài skill vào máy của người chạy: `~/.codex/skills/token-studio-shadcn`, hoặc `$CODEX_HOME/skills/token-studio-shadcn` nếu đã đặt CODEX_HOME. Trên Windows, thư mục mặc định nằm trong `%USERPROFILE%\.codex\skills\token-studio-shadcn`.
+
+Không cần clone repo, build mã nguồn, khởi động editor hoặc cấu hình MCP để dùng riêng quy trình thiết kế. Gói vẫn cài các dependency runtime của nó qua npm; `install-skill` chỉ thực hiện thao tác cài/cập nhật skill, không chạy server hay đổi cấu hình MCP. Mở **phiên Codex mới** sau khi cài, rồi dùng:
+
+```text
+$token-studio-shadcn Thiết kế trang quản lý học viên tiếng Anh 1–1.
+Phỏng vấn các điểm quan trọng chưa rõ, chốt hướng thiết kế,
+tạo SPEC.md rồi triển khai và phản biện bản render.
+```
+
+Để chỉ phỏng vấn và tạo đặc tả:
+
+```text
+$token-studio-shadcn Grill me về ý tưởng ứng dụng của tôi.
+Hỏi để làm rõ, tạo SPEC.md và dừng trước khi viết code.
+```
+
+Skill cung cấp quy trình phỏng vấn, định hướng thiết kế, đặc tả, tái sử dụng component, triển khai và phản biện. Khi không kết nối MCP Token Studio, agent dùng token của dự án và phải nói rõ chưa đồng bộ với editor. Muốn agent đọc/ghi theme trong Studio thì dùng thêm editor + MCP.
+
+### Chia sẻ cho người khác
+
+Sau khi publish thành công, gửi cho người nhận lệnh `npx token-design-studio@latest install-skill` cùng tên skill `$token-studio-shadcn`. Người nhận không cần quyền truy cập repo GitHub private; npm tải nội dung package công khai về máy của họ.
+
+Nội dung có thể gửi:
+
+> Cài Node.js 22.12+ và có Codex hỗ trợ skill local. Chạy `npx token-design-studio@latest install-skill`, mở phiên Codex mới, rồi gọi `$token-studio-shadcn` kèm yêu cầu thiết kế. Skill sẽ phỏng vấn, chốt hướng, tạo đặc tả, triển khai và phản biện theo phạm vi bạn yêu cầu.
+
+**Các lệnh `@latest` trong phần này chỉ dùng được sau khi package đã có trên npm registry.** Nếu chưa publish, có thể gửi file `token-design-studio-0.2.0.tgz` cho người nhận. Trong thư mục chứa file, họ chạy:
+
+```sh
+npm exec --yes --package=./token-design-studio-0.2.0.tgz -- token-design-studio install-skill
+```
+
+Để cập nhật skill, chạy lại lệnh cài phù hợp. Bản được quản lý chưa chỉnh riêng được cập nhật có sao lưu; nếu đã chỉnh riêng, bộ cài dừng để đối chiếu thay vì ghi đè.
+
+### Chọn lệnh theo nhu cầu
+
+| Lệnh CLI | Kết quả |
+| --- | --- |
+| `install-skill` | Chỉ cài/cập nhật quy trình cho Codex; không cần server hoặc Codex CLI |
+| `setup codex` | Cài skill và đăng ký HTTP MCP bằng Codex CLI; giữ Studio chạy khi agent dùng MCP |
+| `start` hoặc không truyền lệnh | Chạy editor + HTTP MCP local và mở trình duyệt |
+| `mcp` | Adapter stdio kết nối tới Studio đang chạy |
+
+## Cài editor và MCP từ gói npm local
 
 Yêu cầu Node.js 22.12+ và npm. Bản 0.2.0 được chuẩn bị dưới dạng `.tgz`, **chưa phát hành lên npm registry**. Tải hoặc lấy file `output/npm/token-design-studio-0.2.0.tgz` rồi chạy trong thư mục chứa file:
 
@@ -85,7 +139,7 @@ Phỏng vấn mặc định một câu mỗi vòng, tối đa ba câu liên quan
 
 Đầu ra là **SPEC.md** gồm người dùng, kết quả mong muốn, phạm vi và phần loại trừ, hành trình, quy tắc nghiệp vụ, dữ liệu/tích hợp, ràng buộc UX, tiêu chí nghiệm thu Given/When/Then, nguồn quyết định và câu hỏi còn mở. `grill-me` dừng ở đặc tả; các chế độ xây dựng tiếp tục khi đã đủ thông tin và đã có yêu cầu triển khai.
 
-Cài skill cho Codex trên máy đang dùng:
+Nếu đang phát triển từ repo, có thể cài skill cho Codex trực tiếp từ mã nguồn. Người chỉ muốn dùng hoặc chia sẻ skill xem phần **Cài riêng skill cho Codex** ở đầu README.
 
 ```powershell
 npm run skill:install
@@ -114,7 +168,7 @@ Khởi động Token Studio trước, sau đó:
 codex mcp add token-studio --url http://127.0.0.1:4318/mcp
 ```
 
-Mở một phiên Codex mới để tải server. Với Codex desktop, có thể thêm HTTP MCP server trong Settings theo URL trên. Đây là server local không cần OAuth hoặc API key. Ứng dụng không tự sửa cấu hình Codex của bạn.
+Mở một phiên Codex mới để tải server. Với Codex desktop, có thể thêm HTTP MCP server trong Settings theo URL trên. Đây là server local không cần OAuth hoặc API key. Editor không tự sửa cấu hình Codex; lệnh CLI `setup codex` thực hiện việc đăng ký có sao lưu khi bạn chủ động chạy.
 
 Yêu cầu thử:
 
