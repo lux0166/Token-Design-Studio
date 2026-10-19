@@ -9,6 +9,19 @@ Use this when choosing UI building blocks. It is a decision guide, not a bundled
 3. Compose installed primitives when a whole block is unnecessary or a poor match.
 4. Add a small domain component for a demonstrated gap; do not rebuild the underlying dialog, focus trap, select or keyboard behavior.
 
+## Icon selection: prioritize Icones
+
+Use [Icones](https://icones.js.org/) first when discovering icons for new UI or a gap in the current set. It explores Iconify collections; choosing from the catalog still requires choosing a specific family. This is a default source preference, not an instruction to replace working project icons.
+
+1. Inspect the installed icon family, wrappers and import conventions. For refinement or reference replication, preserve that family and the reference's icon treatment unless a change is requested or a concrete gap justifies it. Search within that collection first.
+2. For new UI without a family, choose one collection through Icones that fits the established direction and covers the required actions. Keep outline/filled variants, stroke weight, optical size and alignment consistent. A different family for brand logos or a missing domain symbol needs a documented reason; do not mix families arbitrarily or add decorative icons to every heading or card.
+3. Verify each real `collection:icon-name` against Icones or the collection's official data before using it. Verify the actual exported component name too when using a native library; an Iconify ID is not a React import name. Do not invent IDs. If discovery is unavailable, use verified installed icons and record the limit rather than claiming a lookup happened.
+4. Inspect the selected collection's license and preserve any required notices. The explorer's license does not license every icon collection. Record collection, actual IDs, source link, license/notice location and integration in DESIGN.md or the existing component map; keep records proportionate to the changed icons.
+5. Use the project's installed adapter or native library. Otherwise use only the needed local SVGs or build-time icon imports supported by the stack. Do not add multiple icon libraries, download the whole catalog or introduce a runtime network dependency merely to use Icones. Respect existing authorization for dependency changes.
+6. Give icon-only controls an accessible name; hide purely decorative SVGs from assistive technology. Check meaning, contrast, baseline, focus and touch target in the actual affected UI. An icon cannot substitute for a necessary text label. Small token changes and grill-me tasks need no icon work unless it is in scope.
+
+Sources checked 2026-10-19: [Icones project and features](https://github.com/antfu-collective/icones), [Iconify collection model](https://iconify.design/docs/icons/icon-set-basics.html), [collection and license browser](https://icon-sets.iconify.design/). Recheck the selected collection when implementing; no icon assets are bundled by this guide.
+
 ## Mapping common tasks
 
 | User task | Start by looking for | UX/state checks |

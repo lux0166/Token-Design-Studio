@@ -33,9 +33,9 @@ try {
   npm(['install', '--prefix', installDir, '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
   const root = join(installDir, 'node_modules/token-design-studio'), cli = join(root, 'bin/token-design-studio.mjs');
   const installed = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.ok(['0.2.1', '0.3.0'].includes(installed.version), 'Supported release artifact');
+  assert.ok(['0.2.1', '0.3.0', '0.3.1'].includes(installed.version), 'Supported release artifact');
   const expectedTools = installed.version === '0.2.1' ? 11 : 17;
-  const expectedWorkflow = installed.version === '0.2.1' ? '1.2.0' : '1.3.0';
+  const expectedWorkflow = { '0.2.1': '1.2.0', '0.3.0': '1.3.0', '0.3.1': '1.3.1' }[installed.version];
   for (const file of ['dist/index.html', 'runtime/server.js', 'runtime/stdio.js', 'skills/token-studio-shadcn/references/design-quality.md', 'third_party/tweakcn/LICENSE', 'third_party/inter/LICENSE']) assert.ok(existsSync(join(root, file)), file);
   for (const file of ['data', 'apps', 'tests', 'docs', 'server', 'src', 'scripts', '.env']) assert.equal(existsSync(join(root, file)), false, file);
   for (const dep of ['tsx', 'vite', 'esbuild', 'react', 'react-dom', 'lucide-react']) assert.equal(existsSync(join(installDir, 'node_modules', dep)), false, dep);

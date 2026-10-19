@@ -38,9 +38,15 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const workflow = JSON.parse((await call('get_workflow', { mode: 'replicate' })).data);
   assert.equal(workflow.mode, 'replicate');
   assert.equal(workflow.phases.length, 7);
-  assert.equal(workflow.version, '1.3.0');
+  assert.equal(workflow.version, '1.3.1');
   assert.ok(workflow.phases.some((phase: { id: string }) => phase.id === 'interview'));
   assert.match(workflow.interviewGuide, /SPEC.md/);
+  assert.match(client.getInstructions() || '', /https:\/\/icones.js.org\//);
+  assert.equal(workflow.reuseGuide, readFileSync(resolve('skills/token-studio-shadcn/references/reuse.md'), 'utf8'));
+  assert.match(workflow.reuseGuide, /https:\/\/icones.js.org\//);
+  const reuseResource = await client.readResource({ uri: workflow.resources.reuse });
+  assert.ok('text' in reuseResource.contents[0]);
+  assert.equal(reuseResource.contents[0].text, workflow.reuseGuide);
   assert.equal(workflow.designQualityGuide, readFileSync(resolve('skills/token-studio-shadcn/references/design-quality.md'), 'utf8'));
   const qualityResource = await client.readResource({ uri: workflow.resources.designQuality });
   assert.ok('text' in qualityResource.contents[0]);
@@ -79,6 +85,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
     assert.ok(prompt.messages[0].content.text.includes(workflow.instructions));
     assert.ok(prompt.messages[0].content.text.includes(workflow.interviewGuide));
     assert.ok(prompt.messages[0].content.text.includes(workflow.designQualityGuide));
+    assert.ok(prompt.messages[0].content.text.includes(workflow.reuseGuide));
   }
   assert.equal((await call('get_workflow', { mode: 'invalid-mode' })).error, true);
   await assert.rejects(() => client.getPrompt({ name: 'design_and_ship', arguments: { task, mode: 'invalid-mode' } }));

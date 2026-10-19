@@ -32,6 +32,7 @@ Layout and responsive rules:
 Information priority and section → user task/decision map:
 Typography / spacing / color / shape sources:
 Component/block map and provenance:
+Icon family / verified IDs / source / license or notices / integration (when icons change):
 Interactive states and data integration:
 
 Acceptance criteria:

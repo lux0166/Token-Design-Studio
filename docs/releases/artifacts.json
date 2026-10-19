@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-16",
+  "date": "2026-10-19",
   "artifacts": [
     {
       "name": "token-design-studio-0.2.1.tgz",
@@ -15,6 +15,16 @@
       "name": "token-design-studio-skill-0.3.0.tgz",
       "bytes": 127389,
       "sha256": "2fdc1ebf7c1f3b5acb335d3c5db57f8b0672e6942cc840a0de640eb1026ed515"
+    },
+    {
+      "name": "token-design-studio-0.3.1.tgz",
+      "bytes": 552519,
+      "sha256": "85ad4f1a0abcc3a1cf3a5f6690479f913f7d2557b6d8ac80bfc210a31b967361"
+    },
+    {
+      "name": "token-design-studio-skill-0.3.1.tgz",
+      "bytes": 128529,
+      "sha256": "31b1199d8540d470a97c269e3f66490eaea98716033b1de8e3c4b6f5eb2b2838"
     }
   ]
 }

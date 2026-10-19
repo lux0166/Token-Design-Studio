@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- Prioritize Icones for new icon discovery; preserve existing families for scoped refinements.
+- Require verified icon IDs, collection-specific licenses, consistent visual treatment and proportionate provenance.
+- Deliver workflow 1.3.1 through the source skill, MCP instructions/resources/prompts and both installer packages.
+- Preserve existing runtime integrations; no icon dependency added or npm publication performed.
+
 ## 0.3.0
 
 - Track project design dossiers through six additive task MCP tools, HTTP endpoints and the Vietnamese task workspace.

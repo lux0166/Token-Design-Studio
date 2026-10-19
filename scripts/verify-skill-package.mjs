@@ -20,7 +20,7 @@ try {
     const first = run(['install', '--client', client, '--home', home]); assert.equal(first.status, 0, first.stderr);
     const skill = join(home, 'skills/token-studio-shadcn');
     assert.equal(existsSync(join(skill, 'agents/openai.yaml')), client === 'codex');
-    for (const file of ['SKILL.md', 'references/tasks.md', 'assets/task.schema.json', 'assets/task-template.json', 'scripts/validate-task.cjs', 'scripts/THIRD_PARTY_LICENSES.txt']) assert.deepEqual(readFileSync(join(skill, file)), readFileSync(join('skills/token-studio-shadcn', file)));
+    for (const file of ['SKILL.md', 'references/tasks.md', 'references/reuse.md', 'references/handoff.md', 'assets/task.schema.json', 'assets/task-template.json', 'scripts/validate-task.cjs', 'scripts/THIRD_PARTY_LICENSES.txt']) assert.deepEqual(readFileSync(join(skill, file)), readFileSync(join('skills/token-studio-shadcn', file)));
     assert.equal(run(['install', '--client', client, '--home', home]).status, 0);
     assert.equal(run(['install', '--client', client === 'codex' ? 'antigravity' : 'codex', '--home', home]).status, 1, 'do not mix client metadata in the same managed target');
     assert.equal(existsSync(join(home, 'config.toml')), false);

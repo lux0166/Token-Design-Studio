@@ -14,7 +14,13 @@ const isolated = mkdtempSync(join(tmpdir(), 'studio-evaluation-auth-'));
 const auth = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'auth.json');
 if (existsSync(auth)) cpSync(auth, join(isolated, 'auth.json'));
 const files = ['SKILL.md', 'references/design-quality.md'];
-const guide = version => [...files, ...(version === '1.3.0' ? ['references/tasks.md'] : [])].map(file => version === '1.3.0' ? readFileSync(join('skills/token-studio-shadcn', file), 'utf8') : spawnSync('git', ['show', `c3e8142:skills/token-studio-shadcn/${file}`], { encoding: 'utf8', timeout: 10000 }).stdout).join('\n\n');
+// Keep historical benchmark inputs stable when the working-tree workflow changes.
+const guide = version => [...files, ...(version === '1.3.0' ? ['references/tasks.md'] : [])].map(file => {
+  const ref = version === '1.3.0' ? '9f4bef2' : 'c3e8142';
+  const result = spawnSync('git', ['show', `${ref}:skills/token-studio-shadcn/${file}`], { encoding: 'utf8', timeout: 10000 });
+  if (result.status !== 0) throw new Error(result.stderr || `Cannot load benchmark input ${ref}:${file}`);
+  return result.stdout;
+}).join('\n\n');
 const results = [];
 const executable = client => {
   if (process.platform !== 'win32') return client === 'codex' ? 'codex' : 'agy';
