@@ -1,3 +1,4 @@
+import { prepareGrillFixture } from './lib/task-fixture.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, existsSync, writeFileSync, rmSync, statSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -22,14 +23,20 @@ try {
     assert.equal(existsSync(join(skill, 'agents/openai.yaml')), client === 'codex');
     for (const file of ['SKILL.md', 'references/tasks.md', 'references/reuse.md', 'references/handoff.md', 'assets/task.schema.json', 'assets/task-template.json', 'scripts/validate-task.cjs', 'scripts/THIRD_PARTY_LICENSES.txt']) assert.deepEqual(readFileSync(join(skill, file)), readFileSync(join('skills/token-studio-shadcn', file)));
     assert.equal(run(['install', '--client', client, '--home', home]).status, 0);
+    const doctor=run(['doctor','--client',client,'--home',home]);assert.equal(doctor.status,0,doctor.stderr);assert.equal(JSON.parse(doctor.stdout).healthy,true);
+    const adoptHome=join(temp,client+'-legacy'), adoptTarget=join(adoptHome,'skills/token-studio-shadcn');mkdirSync(adoptTarget,{recursive:true});
+    const upstream=spawnSync('git',['show','c3e8142:skills/token-studio-shadcn/SKILL.md'],{encoding:'utf8'});assert.equal(upstream.status,0);writeFileSync(join(adoptTarget,'SKILL.md'),upstream.stdout);
+    assert.equal(run(['install','--client',client,'--home',adoptHome]).status,1);
+    const adopted=run(['install','--client',client,'--home',adoptHome,'--adopt-known']);assert.equal(adopted.status,0,adopted.stderr);assert.ok(JSON.parse(adopted.stdout).backup);assert.equal(existsSync(join(adoptTarget,'agents/openai.yaml')),client==='codex');
     assert.equal(run(['install', '--client', client === 'codex' ? 'antigravity' : 'codex', '--home', home]).status, 1, 'do not mix client metadata in the same managed target');
     assert.equal(existsSync(join(home, 'config.toml')), false);
     writeFileSync(join(skill, 'references/tasks.md'), 'custom task rules'); assert.equal(run(['install', '--client', client, '--home', home]).status, 1); assert.equal(readFileSync(join(skill, 'references/tasks.md'), 'utf8'), 'custom task rules');
   }
-  const task = { task: { schemaVersion: 1, title: 'Grill', goal: 'Document rules', project: 'Fixture', mode: 'grill-me', acceptanceCriteria: ['Rules documented'], artifacts: [{ id: 'spec', kind: 'spec', path: '.token-studio/tasks/example/SPEC.md', label: 'Specification' }] } };
-  const file = join(temp, 'task.json'); writeFileSync(file, JSON.stringify(task));
   const helper = join(homes.codex, 'skills/token-studio-shadcn/scripts/validate-task.cjs');
-  assert.equal(spawnSync(process.execPath, [helper, file]).status, 0); task.task.artifacts = []; writeFileSync(file, JSON.stringify(task)); assert.equal(spawnSync(process.execPath, [helper, file]).status, 1);
+  const fixture = prepareGrillFixture(join(temp, 'task-project'), helper);
+  assert.equal(spawnSync(process.execPath,[helper,fixture.file,'--project-root',join(temp,'task-project')]).status,0);
+  fixture.task.artifacts=[];writeFileSync(fixture.file,JSON.stringify({task:fixture.task}));
+  assert.equal(spawnSync(process.execPath,[helper,fixture.file,'--project-root',join(temp,'task-project')]).status,1);
   assert.equal(run(['install', '--client', 'unknown', '--home', join(temp, 'bad')]).status, 1); assert.equal(existsSync(join(temp, 'bad')), false);
   console.log('PASS lightweight tarball: zero runtime dependencies, <200 KB, Codex + Antigravity isolation, repeat/customization protection, offline validator, no MCP configuration writes.');
 } finally { rmSync(temp, { recursive: true, force: true }); }

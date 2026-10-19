@@ -8,6 +8,7 @@ import { request as httpRequest } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { fixtureTask } from './fixtures/task';
 import { formatWorkflowGuide } from '../shared/workflow.js';
 
 test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, concurrency and export', { timeout: 30000 }, async t => {
@@ -38,7 +39,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const workflow = JSON.parse((await call('get_workflow', { mode: 'replicate' })).data);
   assert.equal(workflow.mode, 'replicate');
   assert.equal(workflow.phases.length, 7);
-  assert.equal(workflow.version, '1.3.2');
+  assert.equal(workflow.version, '1.4.0');
   assert.ok(workflow.phases.some((phase: { id: string }) => phase.id === 'interview'));
   assert.match(workflow.interviewGuide, /SPEC.md/);
   assert.match(client.getInstructions() || '', /https:\/\/icones.js.org\//);
@@ -171,7 +172,7 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   assert.ok(!viaStdio.isError);
   const themeRevisionBeforeTasks = (await state()).revision;
   const post = (path: string, body: unknown, method = 'POST') => fetch(base + path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  const taskContent = { title: 'Chốt quy tắc đổi lịch', goal: 'Làm rõ quy tắc trước code.', project: 'English', mode: 'grill-me', acceptanceCriteria: ['Có quy tắc và ngoại lệ'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Đặc tả', path: '.token-studio/tasks/demo/SPEC.md' }] };
+  const taskContent = fixtureTask(join(dir,'project-fixture'), 'grill-me');
   const taskResponse = await post('/api/tasks', { task: taskContent }); assert.equal(taskResponse.status, 201); const taskRecord = await taskResponse.json();
   const fromStdio = await stdio.callTool({ name: 'get_task', arguments: { taskId: taskRecord.id } });
   assert.ok(Array.isArray(fromStdio.content) && fromStdio.content[0]?.type === 'text'); assert.deepEqual(JSON.parse(fromStdio.content[0].text), taskRecord);
@@ -184,6 +185,12 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   assert.equal((await post(`/api/tasks/${taskRecord.id}/complete`, { expectedRevision: reopened.revision })).status, 422);
   assert.equal((await call('complete_task', { taskId: taskRecord.id, expectedRevision: reopened.revision })).error, true);
   assert.equal((await state()).revision, themeRevisionBeforeTasks);
+  const legacy = await (await post('/api/tasks', {task:{schemaVersion:1,title:'Legacy draft',goal:'Specify',project:'Fixture',mode:'grill-me',acceptanceCriteria:['Rules documented']}})).json();
+  assert.equal(JSON.parse((await call('validate_task', {taskId:legacy.id})).data).needsUpgrade,true);
+  assert.equal((await post(`/api/tasks/${legacy.id}/complete`, {expectedRevision:0})).status,422);
+  const stdioValidation = await stdio.callTool({name:'validate_task',arguments:{taskId:legacy.id}});
+  assert.ok(Array.isArray(stdioValidation.content) && stdioValidation.content[0]?.type === 'text');
+  assert.deepEqual(JSON.parse(stdioValidation.content[0].text), JSON.parse((await call('validate_task', {taskId:legacy.id})).data));
   assert.ok(workflow.taskGuide.includes('complete_task'));
   assert.deepEqual(await stdio.readResource({ uri: workflow.resources.tasks }), await client.readResource({ uri: workflow.resources.tasks }));
 });

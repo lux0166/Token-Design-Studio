@@ -4,19 +4,21 @@ import { resolve, join } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-const destination = resolve('output/evaluations/matrix'); mkdirSync(destination, { recursive: true });
+const release040 = process.argv.includes('--release-040');
+const destination = resolve(release040 ? 'output/evaluations/040/cli-diagnostics' : 'output/evaluations/matrix'); mkdirSync(destination, { recursive: true });
 const cases = JSON.parse(readFileSync('docs/evaluation/cases.json', 'utf8')).cases;
 const schema = { type: 'object', additionalProperties: false, properties: { html: { type: 'string' }, specification: { type: 'string' }, review: { type: 'string' }, limitations: { type: 'array', items: { type: 'string' } } }, required: ['html', 'specification', 'review', 'limitations'] };
-const matrix = ['codex', 'antigravity'].flatMap(client => ['1.2.0', '1.3.0'].flatMap(workflow => cases.map(fixture => ({ client, workflow, case: fixture.id }))));
+const matrix = ['codex', 'antigravity'].flatMap(client => (release040 ? ['1.3.2','1.4.0'] : ['1.2.0','1.3.0']).flatMap(workflow => cases.map(fixture => ({ client, workflow, case: fixture.id }))));
 writeFileSync(join(destination, 'planned.json'), JSON.stringify(matrix, null, 2));
 if (!process.argv.includes('--run')) { console.log('Prepared 8 sessions. Use node scripts/evaluate-workflow.mjs --run for actual opt-in execution.'); process.exit(0); }
 const isolated = mkdtempSync(join(tmpdir(), 'studio-evaluation-auth-'));
 const auth = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'auth.json');
 if (existsSync(auth)) cpSync(auth, join(isolated, 'auth.json'));
-const files = ['SKILL.md', 'references/design-quality.md'];
+const files = release040 ? ['SKILL.md','references/interview.md','references/reuse.md','references/design-quality.md','references/tasks.md','references/handoff.md'] : ['SKILL.md','references/design-quality.md'];
 // Keep historical benchmark inputs stable when the working-tree workflow changes.
 const guide = version => [...files, ...(version === '1.3.0' ? ['references/tasks.md'] : [])].map(file => {
-  const ref = version === '1.3.0' ? '9f4bef2' : 'c3e8142';
+  if (release040 && version==='1.4.0') return readFileSync(join('skills/token-studio-shadcn',file),'utf8');
+  const ref = release040 ? 'cc26f76' : version === '1.3.0' ? '9f4bef2' : 'c3e8142';
   const result = spawnSync('git', ['show', `${ref}:skills/token-studio-shadcn/${file}`], { encoding: 'utf8', timeout: 10000 });
   if (result.status !== 0) throw new Error(result.stderr || `Cannot load benchmark input ${ref}:${file}`);
   return result.stdout;
@@ -50,8 +52,8 @@ async function run(entry) {
     const parsed = JSON.parse(response.replace(/^```json\s*|\s*```$/g, ''));
     if (exit.code !== 0 || typeof parsed.html !== 'string' || !parsed.html.includes('<html') || !Array.isArray(parsed.limitations)) throw new Error('No valid completed prototype response.');
     writeFileSync(join(dir, 'index.html'), parsed.html); writeFileSync(join(dir, 'SPEC.md'), parsed.specification); writeFileSync(join(dir, 'REVIEW.md'), parsed.review); writeFileSync(join(dir, 'response.json'), JSON.stringify(parsed, null, 2));
-    result = { ...entry, status: 'generated-awaiting-render-review', elapsedMs: Date.now() - started, exit, promptSha256: createHash('sha256').update(prompt).digest('hex'), limitations: parsed.limitations };
-  } catch (error) { result = { ...entry, status: 'blocked', elapsedMs: Date.now() - started, exit, reason: error.message }; }
+    result = { ...entry, surface:'cli-constrained-diagnostic', nativeIdeAccepted:false, model:'client default; verify from logs before causal comparison', status: 'generated-awaiting-render-review', elapsedMs: Date.now() - started, exit, promptSha256: createHash('sha256').update(prompt).digest('hex'), limitations: parsed.limitations };
+  } catch (error) { result = { ...entry, surface:'cli-constrained-diagnostic', nativeIdeAccepted:false, status: 'blocked', elapsedMs: Date.now() - started, exit, reason: error.message }; }
   console.log(JSON.stringify(result)); results.push(result); writeFileSync(join(destination, 'results.json'), JSON.stringify(results, null, 2));
   return result;
 }

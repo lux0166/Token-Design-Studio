@@ -11,7 +11,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { hostHeaderValidation } from '@modelcontextprotocol/sdk/server/middleware/hostHeaderValidation.js';
 import { StudioStore, StoreError } from './store.js';
 import { TaskStore } from './tasks.js';
-import { taskInputSchema } from '../shared/tasks.js';
+import { acceptedTaskSchema } from '../shared/tasks.js';
 import { createMcpServer, type AgentOperations } from './mcp.js';
 import { contrastReport, exportCss, snapshotSchema, patchSchema } from '../shared/model.js';
 import { parseThemeCss } from './css.js';
@@ -79,12 +79,12 @@ app.get('/api/state', (_req, res) => res.json(store.read()));
 app.get('/api/status', (_req, res) => res.json({ status: 'online', application: 'token-design-studio', protocolVersion: 1, version, endpoint: `http://127.0.0.1:${port}/mcp`, dataFile: store.path, tasksFile, root: projectRoot, tools: 17, prompts: 2, themes: themeCatalog.length, workflowVersion, stdio: { command: process.execPath, args: existsSync(resolve(projectRoot, 'runtime/stdio.js')) ? [resolve(projectRoot, 'runtime/stdio.js')] : [resolve(projectRoot, 'node_modules/tsx/dist/cli.mjs'), resolve(projectRoot, 'server/stdio.ts')] } }));
 app.get('/api/tasks', (_req, res) => res.json(tasks.list()));
 app.post('/api/tasks', (req, res) => {
-  const input = z.object({ task: taskInputSchema, taskId: z.string().uuid().optional() }).strict().parse(req.body);
+  const input = z.object({ task: acceptedTaskSchema, taskId: z.string().uuid().optional() }).strict().parse(req.body);
   res.status(201).json(tasks.create(input.task, input.taskId));
 });
 app.get('/api/tasks/:id', (req, res) => res.json(tasks.get(req.params.id)));
 app.patch('/api/tasks/:id', (req, res) => {
-  const input = z.object({ task: taskInputSchema, expectedRevision: z.number().int().min(0) }).strict().parse(req.body);
+  const input = z.object({ task: acceptedTaskSchema, expectedRevision: z.number().int().min(0) }).strict().parse(req.body);
   res.json(tasks.update(req.params.id, input.task, input.expectedRevision));
 });
 app.post('/api/tasks/:id/validate', (req, res) => res.json(tasks.validate(req.params.id)));
@@ -142,7 +142,7 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
   const status = error instanceof StoreError ? error.status : error instanceof ThemeCatalogError || error instanceof z.ZodError || (error instanceof Error && error.name === 'CssSyntaxError') ? 400 : 500;
   const message = error instanceof z.ZodError ? error.issues.map(i => `${i.path.join('.')}: ${i.message}`).join('; ') : error instanceof Error ? error.message : 'Lỗi không xác định';
   if (status === 500) console.error(error);
-  res.status(status).json({ error: message });
+  res.status(status).json({ error: message, ...(error instanceof StoreError && error.details ? { details: error.details } : {}) });
 });
 const httpServer = createServer(app);
 for (const signal of ['SIGINT', 'SIGTERM'] as const) process.once(signal, () => {

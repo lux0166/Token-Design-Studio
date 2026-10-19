@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { resolve, relative, extname, isAbsolute } from 'node:path';
-const root = resolve('output/evaluations/matrix'), port = Number(process.env.EVAL_PORT || 14489);
+const root = resolve(process.env.EVAL_ROOT || 'output/evaluations/matrix'), port = Number(process.env.EVAL_PORT || 14489);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Invalid EVAL_PORT');
 createServer((req, res) => {
   try {

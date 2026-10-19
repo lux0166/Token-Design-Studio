@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, lstatSync, readdirSync, readFileSync, readlinkSync, mkdirSync, writeFileSync, renameSync, rmSync, cpSync, accessSync, constants } from 'node:fs';
 import { join, dirname, basename, relative, resolve, isAbsolute } from 'node:path';
 import lockfile from 'proper-lockfile';
+import { knownSkillHashes } from './known-skills.mjs';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const bytesAt = path => existsSync(path) ? readFileSync(path) : null;
@@ -28,7 +29,7 @@ function checkPath(root, file) {
     if (i < parts.length) path = join(path, parts[i]);
   }
 }
-export function planInstallation({ home, source, version, client = 'codex' }) {
+export function planInstallation({ home, source, version, client = 'codex', adoptKnown = false }) {
   home = resolve(home); source = resolve(source);
   if (!['codex', 'antigravity'].includes(client)) throw new Error('Client phải là codex hoặc antigravity.');
   const target = join(home, 'skills', 'token-studio-shadcn');
@@ -48,10 +49,21 @@ export function planInstallation({ home, source, version, client = 'codex' }) {
   const files = names.sort().map(file => {
     checkPath(target, file);
     const bytes = readFileSync(join(source, file)), destination = join(target, file), existing = bytesAt(destination);
-    if (existing && !existing.equals(bytes) && previous.hashes?.[file] !== hash(existing)) throw new Error(`Skill đã được chỉnh riêng: ${destination}. Chưa ghi thay đổi; hãy đối chiếu và hợp nhất trước.`);
+    const known = adoptKnown && !existsSync(manifestPath) && knownSkillHashes[file]?.includes(hash(existing || Buffer.alloc(0)));
+    if (existing && !existing.equals(bytes) && previous.hashes?.[file] !== hash(existing) && !known) throw new Error(`Skill đã được chỉnh riêng: ${destination}. Chưa ghi thay đổi; hãy đối chiếu và hợp nhất trước. Bản cũ đã biết chưa có manifest có thể dùng --adopt-known.`);
     return { file, bytes, destination };
   });
   return { home, target, manifestPath, files, version, client, snapshot: tree(target) };
+}
+export function inspectSkill({home,source,version,client='codex'}) {
+  const target=join(resolve(home),'skills/token-studio-shadcn'), missing=[], customized=[], outdated=[], errors=[];
+  let manifest; const manifestPath=join(target,'.token-design-studio.json');
+  try{if(existsSync(manifestPath))manifest=JSON.parse(readFileSync(manifestPath,'utf8'));}catch(error){errors.push(error.message);}
+  if(manifest?.client&&manifest.client!==client)errors.push(`Client hiện có: ${manifest.client}`);
+  const walk=(dir,prefix='')=>{for(const entry of readdirSync(dir,{withFileTypes:true})){const file=prefix+entry.name;if(client==='antigravity'&&file==='agents')continue;if(entry.isDirectory())walk(join(dir,entry.name),file+'/');else if(entry.isFile()){
+    try{checkPath(target,file);const existing=bytesAt(join(target,file));if(!existing)missing.push(file);else if(!existing.equals(readFileSync(join(dir,entry.name)))){if(manifest?.hashes?.[file]===hash(existing)||(!manifest&&knownSkillHashes[file]?.includes(hash(existing))))outdated.push(file);else customized.push(file);}}catch(error){errors.push(error.message);}
+  }}};walk(source);
+  return {packageVersion:version,installedVersion:manifest?.version??null,client,target,managed:!!manifest,missing,customized,outdated,errors,adoptable:!manifest&&customized.length===0&&errors.length===0&&existsSync(target),healthy:!!manifest&&missing.length===0&&customized.length===0&&outdated.length===0&&errors.length===0};
 }
 export function beginInstallation(plan) {
   const { home, target } = plan;

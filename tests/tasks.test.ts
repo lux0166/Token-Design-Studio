@@ -1,56 +1,111 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { taskInputSchema, validateTask, type TaskInput } from '../shared/tasks';
+import { randomUUID } from 'node:crypto';
+import { taskInputSchema, acceptedTaskSchema, validateTask, upgradeTask } from '../shared/tasks';
 import { TaskStore } from '../server/tasks';
-
-export function completeInput(mode: TaskInput['mode'] = 'design-and-build', scope: TaskInput['scope'] = 'screen'): TaskInput {
-  return taskInputSchema.parse({ title: 'Lịch học 1–1', goal: 'Giáo viên tìm buổi học tiếp theo.', project: 'English learning', mode, scope,
-    direction: { source: 'human', summary: 'Ưu tiên lịch học theo ngày, mật độ vừa.', evidence: 'Brief đã xác nhận trong fixture.' },
-    acceptanceCriteria: ['Tìm buổi học kế tiếp và mở chi tiết.'],
-    artifacts: ['spec', 'design', 'review', 'handoff', 'reference', 'change'].map(kind => ({ id: kind, kind, path: `.token-studio/tasks/example/${kind}.md`, label: kind, ...(kind === 'reference' ? { viewport: { width: 1440, height: 900 } } : {}) })).concat([
-      { id: 'desktop', kind: 'render', path: '.token-studio/tasks/example/evidence/desktop.png', label: 'Desktop', viewport: { width: 1440, height: 900 } },
-      { id: 'mobile', kind: 'render', path: '.token-studio/tasks/example/evidence/mobile.png', label: 'Mobile', viewport: { width: 390, height: 844 } },
-    ]),
-    checks: ['before-code', 'primary-flow', 'after-render', 'affected'].map(kind => ({ id: kind, label: kind, kind, status: 'passed', evidence: `Fixture validation record for ${kind}.` })),
-  });
-}
-test('each task profile can complete with proportionate evidence', () => {
-  for (const mode of ['design-and-build', 'replicate', 'refine', 'grill-me'] as const) assert.equal(validateTask(completeInput(mode)).valid, true, mode);
-  const token = completeInput('refine', 'token-only'); token.artifacts = token.artifacts.filter(a => ['change', 'handoff'].includes(a.kind)); token.checks = token.checks.filter(c => c.kind === 'affected'); token.direction = { source: 'unresolved', summary: '', evidence: '' };
-  assert.equal(validateTask(token).valid, true);
-  const grill = completeInput('grill-me'); grill.artifacts = grill.artifacts.filter(a => a.kind === 'spec'); grill.checks = []; assert.equal(validateTask(grill).valid, true);
+import { fixtureTask, sealTask } from './fixtures/task';
+function directory(t: any) { const dir = mkdtempSync(join(tmpdir(), 'studio-task-v2-')); t.after(() => rmSync(dir, { recursive: true, force: true })); return dir; }
+test('v2 task profiles have sourced acceptance results; small scopes need no screen paperwork', t => {
+    const root = directory(t);
+    for (const mode of ['design-and-build', 'replicate', 'refine', 'grill-me'] as const)
+        assert.deepEqual(validateTask(fixtureTask(root, mode)).issues, [], mode);
+    for (const scope of ['token-only', 'local-ui'] as const) {
+        const task = fixtureTask(root, 'refine', scope);
+        task.artifacts = task.artifacts.filter(a => a.kind === 'test' || (scope === 'local-ui' && a.kind === 'render'));
+        sealTask(task, root);
+        assert.deepEqual(validateTask(task).issues, [], scope);
+    }
 });
-test('completion rejects unresolved intent, unsupported pass claims, unverified repairs and blocking limitations', () => {
-  const task = completeInput();
-  task.decisions.push({ id: 'intent', question: 'Ai có quyền đổi lịch?', answer: '', material: true, status: 'open', source: 'unresolved', evidence: '' });
-  task.checks[0].evidence = '';
-  task.findings.push({ id: 'f1', location: 'Lịch', observation: 'Không mở được buổi học', impact: 'Luồng chính thất bại', evidence: 'Kiểm tra thao tác thất bại.', severity: 'major', status: 'fixed', repair: 'Đã nối handler', recheck: '' });
-  task.limitations.push({ message: 'Không truy cập được browser.', blocking: true });
-  const codes = validateTask(task).issues.map(i => i.code); for (const code of ['decision', 'check', 'finding', 'limitation']) assert.ok(codes.includes(code));
+test('rejects the two reproduced shallow dossiers and unmapped business acceptance', t => {
+    const root = directory(t), grill = fixtureTask(root, 'grill-me');
+    grill.decisions = [];
+    assert.ok(validateTask(grill).issues.some(i => i.code === 'criterion-source'));
+    const screen = fixtureTask(root);
+    screen.acceptanceCriteria.push({ id: 'AC-02', text: 'Reject teacher overlaps', decisionIds: ['D-01'] });
+    assert.ok(validateTask(screen).issues.some(i => i.code === 'criterion-result'));
+    screen.checks.find(c => c.kind === 'acceptance')!.kind = 'primary-flow';
+    assert.ok(validateTask(screen).issues.some(i => i.location === 'acceptanceCriteria.AC-01'));
 });
-test('new screens need desktop and mobile, replication needs matching reference viewport', () => {
-  const task = completeInput(); task.artifacts = task.artifacts.filter(a => a.id !== 'mobile'); assert.ok(validateTask(task).issues.some(i => i.code === 'mobile'));
-  const replica = completeInput('replicate'); replica.artifacts.find(a => a.kind === 'reference')!.viewport!.width = 1300; assert.ok(validateTask(replica).issues.some(i => i.code === 'reference-viewport'));
+test('rejects broken links, unresolved intent, stale pass claims and unrechecked repairs', t => {
+    const task = fixtureTask(directory(t));
+    task.decisions[0].status = 'conflicting';
+    task.checks[0].artifactIds = ['missing'];
+    task.checks[0].criterionIds = ['missing'];
+    task.checks[0].fingerprint = '0'.repeat(64);
+    task.findings.push({ id: 'f', location: 'Lesson', observation: 'No details', evidence: 'Failed click', impact: 'Main task fails', severity: 'major', status: 'fixed', repair: 'Wired action', recheck: '' });
+    task.limitations.push({ message: 'No browser', blocking: true });
+    const codes = validateTask(task).issues.map(i => i.code);
+    for (const code of ['criterion-source', 'decision', 'reference', 'freshness', 'finding', 'limitation'])
+        assert.ok(codes.includes(code), code);
 });
-test('task input rejects unsafe links, duplicate IDs, unsupported shape and grill token edits', () => {
-  const input = completeInput();
-  for (const path of ['../../secret', 'C:\\secret', '/etc/passwd', 'javascript:alert(1)']) { input.artifacts[0].path = path; assert.equal(taskInputSchema.safeParse(input).success, false, path); }
-  assert.equal(taskInputSchema.safeParse({ ...completeInput(), checks: [completeInput().checks[0], completeInput().checks[0]] }).success, false);
-  assert.equal(taskInputSchema.safeParse({ ...completeInput('grill-me'), scope: 'token-only' }).success, false);
+test('viewport rules remain for screens; local-ui still needs affected render and scope', t => {
+    const root = directory(t), task = fixtureTask(root);
+    task.artifacts = task.artifacts.filter(a => a.id !== 'mobile');
+    assert.ok(validateTask(task).issues.some(i => i.code === 'mobile'));
+    const replica = fixtureTask(root, 'replicate');
+    replica.artifacts.find(a => a.kind === 'reference')!.viewport!.width = 1300;
+    assert.ok(validateTask(replica).issues.some(i => i.code === 'reference-viewport'));
+    const local = fixtureTask(root, 'refine', 'local-ui');
+    local.artifacts = local.artifacts.filter(a => a.kind !== 'render');
+    local.notes.scope = '';
+    assert.ok(validateTask(local).issues.some(i => i.code === 'render'));
+    assert.ok(validateTask(local).issues.some(i => i.code === 'scope-notes'));
 });
-test('task persistence, revision conflicts, completion refusal and reopening are atomic', t => {
-  const dir = mkdtempSync(join(tmpdir(), 'studio-tasks-')); t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const path = join(dir, 'tasks.json'), store = new TaskStore(path);
-  const input = taskInputSchema.parse({ title: 'Draft', goal: 'Review schedule', project: 'Example' });
-  const draft = store.create(input); const before = readFileSync(path);
-  assert.throws(() => store.complete(draft.id, draft.revision), /Chưa thể hoàn tất/); assert.deepEqual(readFileSync(path), before);
-  const ready = store.update(draft.id, completeInput(), 0); assert.throws(() => store.update(draft.id, input, 0), /revision hiện tại/);
-  const done = store.complete(draft.id, ready.revision); assert.equal(done.status, 'completed');
-  const reopened = store.update(draft.id, completeInput(), done.revision); assert.equal(reopened.status, 'in-progress'); assert.equal(reopened.completedAt, null);
-  assert.deepEqual(new TaskStore(path).get(draft.id), reopened);
-  assert.throws(() => store.create(input, draft.id), /đã tồn tại/);
-  writeFileSync(path, '{bad'); const corrupt = readFileSync(path); assert.throws(() => new TaskStore(path)); assert.deepEqual(readFileSync(path), corrupt);
+test('v2 rejects unsafe input paths, duplicate criteria and invalid scope combinations', t => {
+    const task = fixtureTask(directory(t));
+    for (const path of ['../../secret', 'C:\\secret', '/etc/passwd', 'javascript:alert(1)'])
+        assert.equal(taskInputSchema.safeParse({ ...task, inputs: { plan: [path], implementation: [] } }).success, false, path);
+    assert.equal(taskInputSchema.safeParse({ ...task, acceptanceCriteria: [task.acceptanceCriteria[0], task.acceptanceCriteria[0]] }).success, false);
+    assert.equal(taskInputSchema.safeParse({ ...task, scope: 'local-ui' }).success, false);
+    assert.equal(taskInputSchema.safeParse({ ...task, mode: 'grill-me', scope: 'token-only' }).success, false);
+});
+test('local report binds the full current dossier and structure-only cannot complete', t => {
+    const task = fixtureTask(directory(t));
+    task.verification!.kind = 'structure-only';
+    assert.ok(validateTask(task).issues.some(i => i.code === 'local-verification'));
+    task.verification!.kind = 'local';
+    task.checks[0].evidence += ' changed';
+    assert.ok(validateTask(task).issues.some(i => i.code === 'local-verification'));
+});
+test('store refuses incomplete/stale writes atomically and reopens completed v2 records', t => {
+    const root = directory(t), path = join(root, 'tasks.json'), store = new TaskStore(path), draft = store.create(taskInputSchema.parse({ title: 'Draft', goal: 'Review', project: 'Fixture' })), before = readFileSync(path);
+    assert.throws(() => store.complete(draft.id, 0), /Chưa thể hoàn tất/);
+    assert.deepEqual(readFileSync(path), before);
+    const task = fixtureTask(root), ready = store.update(draft.id, task, 0);
+    assert.throws(() => store.update(draft.id, task, 0), /revision hiện tại/);
+    const done = store.complete(draft.id, ready.revision);
+    assert.equal(done.completionPolicyVersion, 2);
+    assert.equal(done.status, 'completed');
+    assert.deepEqual(store.complete(done.id, done.revision), store.get(done.id));
+    const reopened = store.update(done.id, task, done.revision);
+    assert.equal(reopened.status, 'in-progress');
+    assert.equal(reopened.completedAt, null);
+    assert.deepEqual(new TaskStore(path).get(done.id), reopened);
+    assert.throws(() => store.create(task, done.id), /đã tồn tại/);
+    writeFileSync(path, '{bad');
+    assert.throws(() => new TaskStore(path));
+    assert.equal(readFileSync(path, 'utf8'), '{bad');
+});
+test('v1 completed history survives store upgrade; edit reopens and v2 upgrade invents no pass', t => {
+    const root = directory(t), path = join(root, 'tasks.json'), id = randomUUID(), now = new Date().toISOString();
+    const legacy = acceptedTaskSchema.parse({ schemaVersion: 1, title: 'Old', goal: 'Specify', project: 'Fixture', mode: 'grill-me', acceptanceCriteria: ['Rules documented'], checks: [{ id: 'old', kind: 'acceptance', label: 'Old claim', status: 'passed', evidence: 'Old evidence' }] });
+    writeFileSync(path, JSON.stringify({ schemaVersion: 1, tasks: [{ id, revision: 4, status: 'completed', createdAt: now, syncedAt: now, completedAt: now, task: legacy }] }));
+    const original = readFileSync(path), store = new TaskStore(path);
+    assert.equal(store.get(id).status, 'completed');
+    assert.equal(store.complete(id, 4).revision, 4);
+    assert.deepEqual(readFileSync(path), original);
+    assert.equal(store.validate(id).completionPolicyVersion, 1);
+    const reopened = store.update(id, legacy, 4);
+    assert.equal(reopened.status, 'in-progress');
+    assert.throws(() => store.complete(id, reopened.revision), /nâng hồ sơ/);
+    assert.equal(readdirSync(root).filter(n => n.includes('.v1-')).length, 1);
+    const upgraded = upgradeTask(legacy);
+    assert.equal(upgraded.acceptanceCriteria[0].id, 'AC-01');
+    assert.deepEqual(upgraded.acceptanceCriteria[0].decisionIds, []);
+    assert.equal(upgraded.checks[0].status, 'pending');
+    assert.equal(upgraded.checks[0].evidence, 'Old evidence');
+    assert.equal(validateTask(upgraded).valid, false);
 });

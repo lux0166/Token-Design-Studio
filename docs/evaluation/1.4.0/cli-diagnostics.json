@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "surface": "CLI constrained diagnostics; not native IDE/app acceptance",
+  "reference": "text-only geometry, not the frozen PNG",
+  "runs": [
+    {
+      "client": "codex",
+      "workflow": "1.3.2",
+      "case": "english-operations",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "model": "client default; verify from logs before causal comparison",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 130826,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "promptSha256": "3dd4868b007643c5cc911f223d2c0b91e74816910cc96427ad9e9c1bcb71bb77",
+      "limitations": [
+        "Browser rendering and interaction checks were not performed; desktop, narrow-screen, focus restoration, overflow and contrast require verification.",
+        "No Token Studio synchronization, task dossier files or schema validation was performed; output is limited to this JSON artifact.",
+        "No repository or shadcn integration was inspected or implemented. All controls use native HTML and local JavaScript.",
+        "Synthetic lessons use a fixed demonstration clock. Role switching is a presentation filter, with no authentication or permissions.",
+        "Changes are in memory only; scheduling edits, conflict resolution, real student records and external classroom services are outside scope."
+      ]
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.2",
+      "case": "english-operations",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "status": "blocked",
+      "elapsedMs": 190785,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "reason": "Unexpected end of JSON input"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.2",
+      "case": "reference-schedule",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "model": "client default; verify from logs before causal comparison",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 79187,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "promptSha256": "e3a4e389a72bc0d6e00149ade1afd71eacc2c2ceb4d752fe36d519166287e587",
+      "limitations": [
+        "Browser rendering and interaction checks were unavailable; required visual and primary-flow verification remain blocked.",
+        "The reference is a text geometry fixture. No image fidelity or screenshot comparison is claimed.",
+        "No tools were called, installed files read, dossier files written, schema validator run or Token Studio synchronization performed.",
+        "No shadcn production integration, registry discovery, external assets or network dependencies are included.",
+        "Lessons use session memory only. Creation has no automatic conflict detection, backend, authentication, shared persistence or business-policy enforcement."
+      ]
+    },
+    {
+      "client": "codex",
+      "workflow": "1.4.0",
+      "case": "english-operations",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "model": "client default; verify from logs before causal comparison",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 155677,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "promptSha256": "b1064e976b3120de04d7e9067c58b774ee753907a88b5dae7e20b1c01bf0a194",
+      "limitations": [
+        "Browser rendering and all runtime acceptance checks remain unperformed; no screenshots or visual comparison evidence exist.",
+        "No repository inspection, installed-file reads, shadcn integration, registry verification or Token Studio synchronization occurred.",
+        "No schema-v2 dossier, helper verification, snapshots or artifact hashes were produced because tools were prohibited.",
+        "Synthetic schedule uses a fixed reference time; no live clock, backend, authentication, shared persistence, rescheduling or teacher permissions are implemented.",
+        "Session state resets on reload. Native dialog behavior requires a modern browser; accessibility and responsive behavior require actual browser verification."
+      ]
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.2",
+      "case": "reference-schedule",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "model": "client default; verify from logs before causal comparison",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 190385,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "promptSha256": "e3a4e389a72bc0d6e00149ade1afd71eacc2c2ceb4d752fe36d519166287e587",
+      "limitations": [
+        "Live browser rendering, screenshot capture, and visual regression diffing were not performed because browser execution tools and display servers are unavailable in this generation environment.",
+        "External frameworks (React, Tailwind CSS, Radix UI) and remote icon sets (Icones/Iconify) were omitted in strict compliance with the isolated standalone prototype requirements.",
+        "Data persistence is local in-memory state; backend API integration, multi-user concurrency, and database synchronization were not implemented.",
+        "Token Studio MCP synchronization tools were not connected; design token values were transcribed directly from the verified text fixture contract."
+      ]
+    },
+    {
+      "client": "codex",
+      "workflow": "1.4.0",
+      "case": "reference-schedule",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "model": "client default; verify from logs before causal comparison",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 82283,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "promptSha256": "5d0596094b3a35d986f3ba5af455fd0c4d2880b80352004c7274e62bbb8f2b11",
+      "limitations": [
+        "Browser rendering, interaction, keyboard, contrast and desktop/mobile screenshot checks were not performed.",
+        "The reference is a text geometry contract; image fidelity and screenshot comparison are unverified.",
+        "Data is synthetic and stored only in page memory; refresh resets changes. No backend, accounts, shared scheduling or notifications.",
+        "Creation only checks identical teacher/start times; durations, overlapping intervals and production scheduling policies are outside this fixture.",
+        "No filesystem dossier, snapshots, hashes, helper verification or Token Studio synchronization was created; tools were prohibited.",
+        "No shadcn components, registry assets or external dependencies were inspected or integrated."
+      ]
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.4.0",
+      "case": "english-operations",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "status": "blocked",
+      "elapsedMs": 188806,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "reason": "Unterminated string in JSON at position 13209 (line 2 column 13208)"
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.4.0",
+      "case": "reference-schedule",
+      "surface": "cli-constrained-diagnostic",
+      "nativeIdeAccepted": false,
+      "status": "blocked",
+      "elapsedMs": 187854,
+      "exit": {
+        "code": 0,
+        "signal": null
+      },
+      "reason": "Unterminated string in JSON at position 9478 (line 2 column 9477)"
+    }
+  ]
+}

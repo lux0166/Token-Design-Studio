@@ -1,0 +1,76 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, mkdirSync, symlinkSync, readdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { createHash, randomBytes } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
+import { sha256 } from '../shared/fingerprint';
+import { captureSnapshot, verifyFiles, projectFile } from '../cli/task-files';
+import { validateTask } from '../shared/tasks';
+import { fixtureTask, sealTask } from './fixtures/task';
+const dir = (t: any) => { const root = mkdtempSync(join(tmpdir(), 'studio-files-')); t.after(() => rmSync(root, { recursive: true, force: true })); return root; };
+test('portable SHA-256 matches Node for text, padding boundaries and random bytes', () => { for (const value of ['', 'abc', 'Tiếng Việt 🎨', ...Array.from({ length: 150 }, (_, i) => randomBytes(i))])
+    assert.equal(sha256(value), createHash('sha256').update(value).digest('hex')); });
+test('local verification detects scoped edits/deletions, evidence edits and manifest changes', t => {
+    const root = dir(t), task = fixtureTask(root);
+    assert.equal(verifyFiles(task, root).valid, true);
+    writeFileSync(join(root, 'unrelated.md'), 'Outside affected scope');
+    assert.equal(verifyFiles(task, root).valid, true);
+    writeFileSync(join(root, 'app.css'), 'changed');
+    assert.ok(verifyFiles(task, root).issues.some(i => i.code === 'freshness'));
+    const before = task.checks.find(c => c.kind === 'before-code')!.fingerprint;
+    task.snapshots.implementation = captureSnapshot(task, root, 'implementation');
+    assert.equal(task.snapshots.plan!.digest, before);
+    assert.ok(validateTask(task).issues.some(i => i.code === 'freshness'));
+    sealTask(task, root);
+    writeFileSync(join(root, 'test.md'), 'Changed evidence');
+    assert.ok(verifyFiles(task, root).issues.some(i => i.code === 'artifact-changed'));
+    rmSync(join(root, 'app.css'));
+    assert.ok(verifyFiles(task, root).issues.some(i => i.code === 'input-file'));
+});
+test('plan edits invalidate before-code; implementation edits leave plan fingerprint intact', t => {
+    const root = dir(t), task = fixtureTask(root), before = task.snapshots.plan!.digest;
+    writeFileSync(join(root, 'app.css'), 'implementation edit');
+    assert.equal(captureSnapshot(task, root, 'plan').digest, before);
+    writeFileSync(join(root, 'spec.md'), 'changed requirement');
+    assert.notEqual(captureSnapshot(task, root, 'plan').digest, before);
+});
+test('snapshot automatically tracks enclosing package manifest and lockfiles', t => {
+    const root = dir(t), task = fixtureTask(root);
+    writeFileSync(join(root, 'package.json'), '{}');
+    writeFileSync(join(root, 'package-lock.json'), '{}');
+    sealTask(task, root);
+    assert.ok(task.snapshots.implementation!.files.some(f => f.path === 'package-lock.json'));
+    writeFileSync(join(root, 'package-lock.json'), '{"changed":true}');
+    assert.ok(verifyFiles(task, root).issues.some(i => i.code === 'freshness'));
+});
+test('project root boundary rejects traversal and symlinks outside root', t => {
+    const root = dir(t), outside = dir(t);
+    writeFileSync(join(outside, 'secret'), 'private');
+    assert.throws(() => projectFile(root, '../secret'));
+    const link = join(root, 'escape');
+    symlinkSync(outside, link, process.platform === 'win32' ? 'junction' : 'dir');
+    assert.throws(() => projectFile(root, 'escape/secret'), /ngoài project root/);
+});
+test('CLI upgrade backs up; snapshot never restamps passed checks; legacy invocation needs a root', t => {
+    const root = dir(t), path = join(root, 'task.json'), helper = resolve('cli/validate-task.ts');
+    const run = (args: string[]) => spawnSync(process.execPath, ['--import', 'tsx', helper, ...args], { encoding: 'utf8', windowsHide: true });
+    writeFileSync(path, JSON.stringify({ task: { schemaVersion: 1, title: 'Legacy', goal: 'Specify', project: 'Fixture', mode: 'grill-me', acceptanceCriteria: ['Rules documented'] } }));
+    assert.equal(run(['upgrade', path]).status, 0);
+    assert.equal(readdirSync(root).filter(p => p.endsWith('.bak')).length, 1);
+    assert.equal(JSON.parse(readFileSync(path, 'utf8')).task.schemaVersion, 2);
+    const task = fixtureTask(root);
+    writeFileSync(path, JSON.stringify({ task }));
+    assert.match(run([path]).stderr, /project-root/);
+    assert.equal(run([path, '--project-root', root]).status, 0);
+    const old = task.checks[1].fingerprint;
+    writeFileSync(join(root, 'app.css'), 'changed');
+    assert.equal(run(['snapshot', path, '--project-root', root, '--phase', 'implementation', '--write']).status, 0);
+    const next = JSON.parse(readFileSync(path, 'utf8')).task;
+    assert.equal(next.checks[1].fingerprint, old);
+    assert.notEqual(next.snapshots.implementation.digest, old);
+    const failed = run(['verify', path, '--project-root', root, '--write']);
+    assert.equal(failed.status, 1);
+    assert.equal(JSON.parse(readFileSync(path, 'utf8')).task.verification.valid, false);
+});

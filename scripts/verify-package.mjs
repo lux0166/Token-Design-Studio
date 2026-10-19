@@ -1,3 +1,4 @@
+import { prepareGrillFixture } from './lib/task-fixture.mjs';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync, realpathSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -33,9 +34,9 @@ try {
   npm(['install', '--prefix', installDir, '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
   const root = join(installDir, 'node_modules/token-design-studio'), cli = join(root, 'bin/token-design-studio.mjs');
   const installed = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  assert.ok(['0.2.1', '0.3.0', '0.3.1', '0.3.2'].includes(installed.version), 'Supported release artifact');
+  assert.ok(['0.2.1', '0.3.0', '0.3.1', '0.3.2', '0.4.0'].includes(installed.version), 'Supported release artifact');
   const expectedTools = installed.version === '0.2.1' ? 11 : 17;
-  const expectedWorkflow = { '0.2.1': '1.2.0', '0.3.0': '1.3.0', '0.3.1': '1.3.1', '0.3.2': '1.3.2' }[installed.version];
+  const expectedWorkflow = { '0.2.1': '1.2.0', '0.3.0': '1.3.0', '0.3.1': '1.3.1', '0.3.2': '1.3.2', '0.4.0': '1.4.0' }[installed.version];
   for (const file of ['dist/index.html', 'runtime/server.js', 'runtime/stdio.js', 'skills/token-studio-shadcn/references/design-quality.md', 'third_party/tweakcn/LICENSE', 'third_party/inter/LICENSE']) assert.ok(existsSync(join(root, file)), file);
   for (const file of ['data', 'apps', 'tests', 'docs', 'server', 'src', 'scripts', '.env']) assert.equal(existsSync(join(root, file)), false, file);
   for (const dep of ['tsx', 'vite', 'esbuild', 'react', 'react-dom', 'lucide-react']) assert.equal(existsSync(join(installDir, 'node_modules', dep)), false, dep);
@@ -90,7 +91,8 @@ try {
   const saved = await (await fetch(`${base}/api/state`)).json(); assert.equal(saved.systems.find(s => s.id === created.id).settings.radius, 17);
   let task;
   if (expectedTools === 17) {
-  task = await call('create_task', { task: { title: 'Package grill fixture', goal: 'Specify schedule rules', project: 'Package verification', mode: 'grill-me', acceptanceCriteria: ['Rules specified'], artifacts: [{ id: 'spec', kind: 'spec', label: 'Specification', path: '.token-studio/tasks/package/SPEC.md' }] } });
+  const taskInput = installed.version === '0.4.0' ? prepareGrillFixture(join(temp, 'task-project'), join(root,'skills/token-studio-shadcn/scripts/validate-task.cjs')).task : { schemaVersion:1, title:'Package grill fixture', goal:'Specify schedule rules', project:'Package verification', mode:'grill-me', acceptanceCriteria:['Rules specified'], artifacts:[{id:'spec',kind:'spec',label:'Specification',path:'.token-studio/tasks/package/SPEC.md'}] };
+  task = await call('create_task', {task:taskInput});
   assert.equal((await call('validate_task', { taskId: task.id })).valid, true);
   const completedTask = await call('complete_task', { taskId: task.id, expectedRevision: task.revision }); assert.equal(completedTask.status, 'completed');
   assert.equal((await (await fetch(`${base}/api/state`)).json()).revision, saved.revision);

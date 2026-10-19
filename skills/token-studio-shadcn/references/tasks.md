@@ -1,36 +1,54 @@
-# Project task dossiers — workflow 1.3.0
+# Project task dossiers — workflow 1.4.0
 
-Keep the project's files as the source of truth. Create `.token-studio/tasks/<UUID>/task.json` with `{ "taskId": "<UUID>", "task": { ... } }`. Use `assets/task-template.json` as the content shape and `assets/task.schema.json` for validation. Replace example text with actual evidence; the template is deliberately incomplete. Reuse the same UUID across clients and sessions. Do not commit private conversations or confidential images without the user's scope permitting it.
+Keep project files as the source of truth: `.token-studio/tasks/<UUID>/task.json`, shaped `{ "taskId": "<UUID>", "task": { ... } }`. Reuse that UUID across sessions. Use assets/task-template.json and assets/task.schema.json. Actual documents and screenshots stay in the project. Never fabricate an interview answer, a file read, a browser pass or user approval.
 
-## Files and synchronization
+## Choose the smallest honest scope
 
-Place SPEC.md, DESIGN.md, REVIEW.md, HANDOFF.md and evidence/ in this folder as needed. Artifact paths are relative to the project root, not the dossier directory. For a screenshot reference, HTTP(S) URLs are also accepted; record viewport dimensions. Studio never fetches those URLs or reads the local paths. Save actual files in the project before recording links.
+- New screens and replication use `scope: "screen"`. Keep SPEC/DESIGN/REVIEW/HANDOFF or the project's equivalents as appropriate; a single relevant document may supply several labeled artifacts. New screen: sourced direction, before-code/primary-flow/after-render checks and desktop ≥1024px plus mobile ≤640px renders. Replication: real reference and render at matching viewport, documented differences. Existing screen-wide refinement retains design/review/handoff and the three screen checks.
+- `mode: "refine", scope: "local-ui"`: a change in an existing UI region, without a new route, business flow or broad system redesign. Use notes.scope, notes.change and notes.handoff, affected and acceptance checks and a render of the changed region with viewport. Separate DESIGN/REVIEW/HANDOFF files are unnecessary. Test responsive/keyboard states when affected. If the change grows, update scope; ask only about new material intent.
+- `scope: "token-only"`: short scope/change/handoff notes, affected and acceptance checks. Set requirements.contrast / requirements.render when the changed colors or visual roles require those checks. No generic interview or screen dossier.
+- `mode: "grill-me", scope: "screen"`: specification and an acceptance check of its coverage, decisions and scenarios. Stop before product implementation. No code, browser or render required. Do not confuse specifying a future behavior with having implemented/tested that behavior.
+- Critique-only work does not need an implementation dossier unless requested.
 
-With MCP, use create_task with `task` and the UUID as taskId. Use list_tasks/get_task to resume, then update_task with the complete current task content and latest **task** expectedRevision. Theme and task revisions are independent. A conflict means reread and reconcile; never overwrite a newer task blindly. Keep the project JSON updated from actual work. Studio's synced record does not update project files. Call validate_task, repair the listed gaps, then complete_task with the latest revision. Any later update reopens the task. Without MCP, keep the same files, run the installed skill's `scripts/validate-task.cjs` against task.json when Node is available, and disclose that Studio was not synchronized. Do not imply offline validation changes server status.
+## Record actual intent and trace acceptance
 
-For MCP-only clients without installed assets, use the create_task input schema or read `token-studio://tasks/schema`; `get_workflow` supplies this guide as taskGuide. Do not assume a path on the Studio server is accessible in the target project.
+Use schemaVersion **2**. Record decisions with id, question, actual answer, material, status, source and evidence. Sources are human/project/reference/delegated/unresolved. Existing answers or a sufficiently clear brief can supply a decision; do not ask again merely to populate fields. A proposal or silence is not confirmation.
 
-## Content fields
+Each acceptanceCriteria entry is `{id, text, decisionIds}`. Reference at least one resolved decision with an answer and source evidence. Use stable IDs such as AC-01. A concrete outcome includes relevant failure behavior, not just component presence. Checks use `{id, label, kind, status, required, evidence, criterionIds, artifactIds, fingerprint}`; kinds include before-code, primary-flow, after-render, contrast, affected and acceptance. Every criterion needs a passed **acceptance** check linking that ID and real local artifact evidence. Generic layout checks do not establish an untested booking or permission rule.
 
-- schemaVersion: 1; title, goal, project; mode: design-and-build / replicate / refine / grill-me; scope: screen / token-only. Grill-me always uses screen and never changes tokens.
-- decisions: id, question, answer, material, status (open/conflicting/resolved), source (human/project/reference/delegated/unresolved), evidence. Record the actual answer/reference and its source. A proposed recommendation or silence is not confirmation. Mark open important questions visibly; do independent work while waiting.
-- direction: source (human/project/reference/delegated/unresolved), summary, evidence. When new UI lacks direction, offer two meaningfully different options and obtain a real choice before dependent code. Record the choice/explicit delegation rather than inventing it.
-- acceptanceCriteria: concrete outcomes, not style adjectives.
-- artifacts: id, kind (spec/design/review/handoff/reference/render/test/change), path, label; optional viewport {width,height} in CSS pixels. Render/reference evidence for fidelity includes the viewport.
-- checks: id, label, kind (before-code/primary-flow/after-render/contrast/affected/acceptance), status (pending/passed/failed/blocked), required, evidence. Evidence links a command result, screenshot/interaction inspection, or precise observation. Missing browser access is blocked, not passed. Mark a check optional only when it is genuinely outside the affected scope, with the rationale recorded.
-- findings: id, location, observation, evidence, impact, severity (blocker/major/minor), status (open/fixed/deferred/out-of-scope), repair, recheck. Blocker/major needs fixed + actual repair and recheck before completion. Do not downgrade findings to bypass the gate.
-- limitations: message, blocking. Missing mandatory browser/reference access blocks completion. Nonblocking limitations describe genuinely out-of-scope capabilities, not unperformed required checks.
+Artifacts use id, kind, path, label, optional viewport {width,height}, and sha256 when used by a passed check. Paths are relative to the project root. Only a reference may remain a remote URL during local verification; save required screenshots/reports locally. The hash identifies bytes, not whether an image was viewed. Findings retain location, observation, evidence, impact, severity, repair and recheck. Unresolved material decisions, failed required checks, blocking limitations and unverified blocker/major repairs prevent completion.
 
-## Proportionate completion
+## Capture scope and evidence at the right time
 
-All modes need acceptance criteria, resolved material decisions with sources, passed required checks with evidence, and no blocking limitations or unverified blocker/major repairs.
+Declare inputs.plan and inputs.implementation as **files**, not directories or glob patterns. Plan files include relevant brief/contracts; spec/design artifact paths are included automatically. Implementation files cover changed source plus related components/styles/assets/config. The helper adds enclosing package manifests and lockfiles. Include indirect dependencies that affect the changed UI; the helper does not infer the complete import graph. Exclude unrelated files and task.json itself. No background watcher runs.
 
-| Work | Additional records |
-| --- | --- |
-| New screen | spec/design/review/handoff, sourced direction, before-code + primary-flow + after-render checks, desktop render ≥1024px and narrow render ≤640px |
-| Replicate | design/review/handoff, sourced direction, reference + render at matching viewport, the three screen checks; explain differences in REVIEW.md |
-| Refine | design/review/handoff scoped to the affected area, sourced existing direction, render with viewport, the three screen checks; a brief note is enough for DESIGN.md |
-| Grill-me | spec; stop at the specification, no code/render required |
-| Token-only | change note + handoff, affected check; no generic interview, full spec or layout dossier |
+The plan fingerprint binds goal, decisions, criteria, scope, direction, relevant notes and plan files. A before-code check binds to it. Implementation fingerprints bind the plan plus declared implementation files and package inputs; behavior/render checks bind to these. Code edits do not invalidate an unchanged plan, but plan edits invalidate the dependent implementation snapshot. Grill-me checks use the plan phase.
 
-Studio checks the reported dossier structure and results. It cannot certify the truth of a claimed test, whether an image was viewed, aesthetic quality, or agent actions outside Studio. Do not claim independent review, conversion improvement, guaranteed pixel fidelity or a beauty/slop score.
+Use the installed scripts/validate-task.cjs (replace `<helper>` and `<root>` with actual paths):
+
+```sh
+node <helper> snapshot <task.json> --project-root <root> --phase plan --write
+node <helper> snapshot <task.json> --project-root <root> --phase implementation --write
+node <helper> verify <task.json> --project-root <root> --write
+```
+
+1. Create the real plan files, criteria/decision links and input lists. Capture plan before dependent code; perform the review and record its fingerprint on that check.
+2. Implement authorized work. Capture implementation before checking its behavior/render. Omit this phase in grill-me.
+3. Perform each real check and save its actual screenshot/log/observation. Snapshot output includes hashes for existing local artifacts; record the corresponding artifact.sha256 and the fingerprint of the phase checked. Missing future artifacts are not supplied with fake hashes. A completed check must refer to the fingerprint it actually tested.
+4. `verify --write` reads files, compares hashes, checks coverage and stores task.verification with the digest of the current dossier. Fix missing/stale evidence and rerun relevant checks, then verify again. Refreshing a snapshot does **not** update existing check fingerprints or artifact hashes. Do not manually re-stamp old results after code changes.
+
+Default `verify` prints a report; --write stores it atomically. Without an explicit command, the legacy `node <helper> <task.json>` invocation runs verify. Root is inferred only from the standard dossier location; otherwise pass --project-root. --structure-only does not read linked files and cannot support v2 completion. Files must resolve inside root (no escaping traversal/symlinks); limits are 32 MB per file and 64 MB per verification. The helper never runs commands from task data, downloads URLs or certifies image content.
+
+## Sync and complete
+
+With MCP, use create_task with the UUID as taskId. Resume via list_tasks/get_task; update_task replaces the task with the latest **task** expectedRevision. Theme revisions are independent. Sync the current task including its verification report. Inspect validate_task and repair its issues before complete_task with the latest revision. A changed record reopens a completed task. File edits outside Studio are detected only at the next local verify and sync, not automatically.
+
+Without MCP, keep the same project dossier and verify locally; state that Studio was not synchronized. With MCP only, read token-studio://tasks/schema or the input schema; the helper must still run in the actual project to supply a local report. Do not assume the Studio server path is accessible. No fake local report when file/browser tools are missing: record the block and continue unrelated work.
+
+Studio checks reported structure, traceability, hashes and report consistency. It cannot authenticate the client report, image inspection, human intent, aesthetic quality or external agent behavior. Preserve required screenshots/browser checks; do not claim independent review, production readiness or quality/speed gains from a structurally valid task.
+
+## Upgrade and history
+
+`node <helper> upgrade <task.json>` backs up v1 JSON, assigns stable criterion IDs and preserves old notes/evidence. Checks become pending; source and artifact links remain unresolved until actually supplied. It never invents a pass. Existing v2 content is unchanged by upgrade.
+
+Studio keeps v1 completed history labeled as the old policy. New completion needs v2. Editing an old completed record reopens it. Read policyVersion, completionPolicyVersion, needsUpgrade and evidenceLevel rather than presenting old completion as new verification.

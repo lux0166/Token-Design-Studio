@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "release": "0.4.0",
+  "workflow": "1.4.0",
+  "status": "in-progress",
+  "codex": {
+    "status": "passed",
+    "surface": "Codex desktop native chat",
+    "threadId": "01a15314-b2d0-7600-bc87-815c0eadac9c",
+    "taskId": "ab7cd0bd-7a8c-4013-b88c-8eb6676a99e4",
+    "metadataVersion": "0.4.0",
+    "schemaVersion": 2,
+    "catalogObservation": "Reported in the real app chat; see client evidence",
+    "independentLocalVerify": {
+      "valid": true,
+      "issues": [],
+      "files": 4,
+      "taskDigest": "399f388c10cb8ef420f96736b0854034cb95055866d35227f19d2415ab6b2110"
+    }
+  },
+  "antigravity": {
+    "status": "awaiting-user-assisted-native-smoke",
+    "installedAppVersion": "2.24.0.0",
+    "installedSkillVersion": "0.4.0",
+    "doctorHealthy": true,
+    "limitation": "Native UI automation kernel failed to initialize. CLI is not counted as IDE/app.",
+    "prompt": "output/native-smoke-antigravity/PROMPT.md"
+  },
+  "nativeComparisonStatus": "4 Codex sessions started; 4 Antigravity sessions pending native app access"
+}

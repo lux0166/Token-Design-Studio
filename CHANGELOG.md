@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — implementation; native-client acceptance tracked separately
+
+- Add v2 criterion/decision/check/artifact traceability and local report binding.
+- Add scoped plan/implementation SHA-256 snapshots, local file verification and safe v1 upgrade.
+- Preserve completed legacy records and back up the store on format migration.
+- Support local-ui refinements and token notes without screen paperwork.
+- Add installer doctor and explicit known-baseline adoption, preserving custom files and transaction recovery.
+- Keep the 17 MCP tools, legacy inputs and theme revisions; update HTTP/UI/prompts/resources and shared skill.
+- See docs/releases/0.4.0.md for actual validation and remaining client/benchmark gates; no npm publication or GitHub merge.
+
 ## 0.3.2
 
 - Add Koboyo as a source for confirmed hand-drawn icon/illustration directions, alongside the Icones default.

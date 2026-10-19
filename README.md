@@ -1,5 +1,29 @@
 # Token Design Studio
 
+## 0.4.0 — hồ sơ v2 và nghiệm thu có truy vết
+
+Bản triển khai workflow 1.4.0 bổ sung liên kết quyết định → tiêu chí → kiểm tra → bằng chứng, snapshot SHA-256 theo vùng ảnh hưởng, kiểm chứng file local và phạm vi tinh chỉnh nhỏ. **Nghiệm thu client thật đang được theo dõi riêng**; xem [báo cáo 0.4.0](docs/releases/0.4.0.md). Giữ lịch sử hoàn tất v1 với nhãn chuẩn cũ; muốn nghiệm thu mới phải nâng hồ sơ.
+
+Gói skill nhẹ có lệnh kiểm tra và nâng bản cũ đã biết:
+
+```sh
+npx token-design-studio-skill@latest doctor --client codex
+npx token-design-studio-skill@latest install --client codex --adopt-known
+```
+
+Các lệnh npm trên dùng sau khi publish. Trước đó thay bằng `npm exec --yes --package=./token-design-studio-skill-0.4.0.tgz -- token-design-studio-skill ...`. Antigravity IDE/app dùng `--client antigravity`; không dùng đường dẫn CLI. `--adopt-known` chỉ tiếp nhận bản không có manifest trùng nguồn đã biết; file chỉnh riêng vẫn được bảo vệ và giao dịch giữ backup. Mở phiên client mới sau khi cài.
+
+Hồ sơ trong dự án dùng schemaVersion 2, tiêu chí `{id,text,decisionIds}`, kiểm tra có `criterionIds`, `artifactIds` và `fingerprint`. Tác vụ `refine + local-ui` dùng ghi chú phạm vi/thay đổi/bàn giao và bằng chứng vùng ảnh hưởng; không bắt tạo bộ tài liệu màn hình. Hướng dẫn đầy đủ nằm trong [task guide](skills/token-studio-shadcn/references/tasks.md).
+
+```sh
+node <skill>/scripts/validate-task.cjs upgrade <task.json>
+node <skill>/scripts/validate-task.cjs snapshot <task.json> --project-root <root> --phase plan --write
+node <skill>/scripts/validate-task.cjs snapshot <task.json> --project-root <root> --phase implementation --write
+node <skill>/scripts/validate-task.cjs verify <task.json> --project-root <root> --write
+```
+
+Ghi fingerprint đúng lúc kiểm tra, lưu ảnh/log thật và hash bằng chứng; snapshot mới không tự công nhận kết quả cũ. Helper kiểm tra file và hash, không thực thi lệnh từ hồ sơ. Studio nhận báo cáo được đồng bộ, không đọc filesystem dự án hay theo dõi thay đổi nền; báo cáo local không chứng nhận tính trung thực hoặc chất lượng thiết kế.
+
 ## 0.3.2: bổ sung icon và minh họa nét vẽ tay từ Koboyo
 
 Khi hướng thiết kế đã chọn cần nét vẽ tay, workflow ưu tiên [Koboyo Icons](https://koboyo.com/icons): chọn kiểu nét nhất quán, xác minh trang/slug thật, dùng SVG local và ghi nguồn cùng điều kiện sử dụng. [Giấy phép Koboyo](https://koboyo.com/icons/license) có giới hạn phân phối lại và công cụ chọn/xuất icon; Studio và package chỉ chứa hướng dẫn, không đóng gói tài nguyên Koboyo. Xem [kiểm chứng bản vá](docs/releases/0.3.2.md).
@@ -19,11 +43,11 @@ npx token-design-studio-skill@latest install --client codex
 npx token-design-studio-skill@latest install --client antigravity
 ```
 
-Trước khi publish, gửi tarball `token-design-studio-skill-0.3.2.tgz` cho người nhận:
+Trước khi publish, gửi tarball `token-design-studio-skill-0.4.0.tgz` cho người nhận:
 
 ```sh
-npm exec --yes --package=./token-design-studio-skill-0.3.2.tgz -- token-design-studio-skill install --client codex
-npm exec --yes --package=./token-design-studio-skill-0.3.2.tgz -- token-design-studio-skill install --client antigravity
+npm exec --yes --package=./token-design-studio-skill-0.4.0.tgz -- token-design-studio-skill install --client codex
+npm exec --yes --package=./token-design-studio-skill-0.4.0.tgz -- token-design-studio-skill install --client antigravity
 ```
 
 Node 22.12+. Gói skill không tải editor/server hoặc dependency runtime bên ngoài, không sửa MCP. Codex dùng `CODEX_HOME` hoặc `~/.codex`; Antigravity **IDE/app** dùng `~/.gemini/config/skills` (khác Antigravity CLI). `--home PATH` chọn thư mục cấu hình client để cài vào môi trường riêng. File Codex `agents/openai.yaml` không được cài sang Antigravity. Mở phiên client mới sau khi cài.
