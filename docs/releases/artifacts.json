@@ -25,6 +25,16 @@
       "name": "token-design-studio-skill-0.3.1.tgz",
       "bytes": 128529,
       "sha256": "31b1199d8540d470a97c269e3f66490eaea98716033b1de8e3c4b6f5eb2b2838"
+    },
+    {
+      "name": "token-design-studio-0.3.2.tgz",
+      "bytes": 554040,
+      "sha256": "ed1a73bbde11742fbcf9215739259fe44887ae356009f7141446b42fe3c40965"
+    },
+    {
+      "name": "token-design-studio-skill-0.3.2.tgz",
+      "bytes": 129712,
+      "sha256": "3bb670133dee332ec3dad32d3633fa1cb12bc3cbe8846984ecfe82a3d7b3227c"
     }
   ]
 }

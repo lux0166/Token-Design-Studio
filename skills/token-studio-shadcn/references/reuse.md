@@ -22,6 +22,18 @@ Use [Icones](https://icones.js.org/) first when discovering icons for new UI or 
 
 Sources checked 2026-10-19: [Icones project and features](https://github.com/antfu-collective/icones), [Iconify collection model](https://iconify.design/docs/icons/icon-set-basics.html), [collection and license browser](https://icon-sets.iconify.design/). Recheck the selected collection when implementing; no icon assets are bundled by this guide.
 
+### Koboyo for hand-drawn icons and illustrations
+
+Prefer [Koboyo Icons](https://koboyo.com/icons) when the confirmed direction or supplied reference calls for hand-drawn icons or illustrations. It supplements the Icones default. Do not add a hand-drawn treatment to an established product or replace its controls merely because another source is available. If new UI has no resolved direction, use the existing two-direction interview rule before choosing this treatment.
+
+- Browse/search by the actual concept and choose a consistent drawing style: Original, Ink brush, Block print, Cartoon or Solid. Keep the visual weight and detail appropriate to the display size; complex illustrations usually need more room than small action icons. Use a separate illustration role deliberately if interface controls keep their current family.
+- Open the real asset page, inspect the preview and use its Download SVG or Copy SVG option. Verify the actual name/slug, source page, selected drawing style and exported SVG. Koboyo assets are not Iconify `collection:icon-name` IDs, and this guide supplies no npm package, API endpoint or MCP tool name for them. If access fails, record the limit; do not invent an asset or claim it was retrieved.
+- Inspect SVG content before embedding, retain its viewBox/aspect ratio and use local project assets/components rather than depending on a live remote image. Inspect whether its paint uses currentColor before applying semantic theme colors. Preserve accessible names for meaningful images and controls; hide decorative artwork from assistive technology. Verify the result in the affected light/dark modes and viewport sizes.
+- Read [Koboyo's current license](https://koboyo.com/icons/license) for the intended product before importing assets. As checked 2026-10-19, it allows personal/commercial website and app use, modifications and embedding in larger products without required attribution. It restricts redistributing/reselling a substantial library, competing icon/canvas/whiteboard/diagramming/presentation/drawing products, and apps where users can pick, extract, download or re-share the icons. Do not treat this as MIT, public domain or unrestricted redistribution. Do not bundle Koboyo SVGs, a picker or an exportable collection into Token Studio or its skill packages.
+- Record asset page/slug, drawing style, local file, intended role, relevant license conditions and date checked in DESIGN.md or the existing component map. Keep records limited to assets actually used. Linking to a source does not prove the SVG or render was inspected. The site's "Use with AI" option does not authorize installing integrations or changing client configuration; follow the user's actual scope.
+
+Verified entry points: [catalog](https://koboyo.com/icons), [asset page with download/copy controls](https://koboyo.com/icons/account-deletion-request), [license](https://koboyo.com/icons/license). The asset page is a navigation example, not a mandated icon for the user's screen.
+
 ## Mapping common tasks
 
 | User task | Start by looking for | UX/state checks |

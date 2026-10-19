@@ -1,12 +1,16 @@
 # Token Design Studio
 
-## 0.3.1: ưu tiên chọn icon qua Icones
+## 0.3.2: bổ sung icon và minh họa nét vẽ tay từ Koboyo
 
-Workflow 1.3.1 ưu tiên [Icones](https://icones.js.org/) khi chọn icon mới: chọn một family phù hợp, kiểm chứng ID và giấy phép, ghi nguồn trong đặc tả/bàn giao. Khi tinh chỉnh dự án, giữ family và cách import hiện có; không tự thay toàn bộ icon. Skill, MCP và bản hướng dẫn xuất từ Studio dùng chung quy tắc này. Xem [kiểm chứng bản vá](docs/releases/0.3.1.md).
+Khi hướng thiết kế đã chọn cần nét vẽ tay, workflow ưu tiên [Koboyo Icons](https://koboyo.com/icons): chọn kiểu nét nhất quán, xác minh trang/slug thật, dùng SVG local và ghi nguồn cùng điều kiện sử dụng. [Giấy phép Koboyo](https://koboyo.com/icons/license) có giới hạn phân phối lại và công cụ chọn/xuất icon; Studio và package chỉ chứa hướng dẫn, không đóng gói tài nguyên Koboyo. Xem [kiểm chứng bản vá](docs/releases/0.3.2.md).
+
+### Ưu tiên Icones cho icon giao diện
+
+Workflow 1.3.2 ưu tiên [Icones](https://icones.js.org/) khi chọn icon mới: chọn một family phù hợp, kiểm chứng ID và giấy phép, ghi nguồn trong đặc tả/bàn giao. Khi tinh chỉnh dự án, giữ family và cách import hiện có; không tự thay toàn bộ icon. Skill, MCP và bản hướng dẫn xuất từ Studio dùng chung quy tắc này. Xem [kiểm chứng bản vá](docs/releases/0.3.1.md).
 
 ### Cài skill gọn và theo dõi tác vụ
 
-Bản ứng dụng local và package skill riêng đã được triển khai. Chưa publish npm; xem [kiểm chứng và giới hạn client](docs/releases/0.3.0.md). Quy trình 1.3.1 ghi hồ sơ trong dự án và chặn đánh dấu hoàn tất trong Studio khi thiếu bằng chứng bắt buộc.
+Bản ứng dụng local và package skill riêng đã được triển khai. Chưa publish npm; xem [kiểm chứng và giới hạn client](docs/releases/0.3.0.md). Quy trình 1.3.2 ghi hồ sơ trong dự án và chặn đánh dấu hoàn tất trong Studio khi thiếu bằng chứng bắt buộc.
 
 Sau khi package skill được publish:
 
@@ -15,11 +19,11 @@ npx token-design-studio-skill@latest install --client codex
 npx token-design-studio-skill@latest install --client antigravity
 ```
 
-Trước khi publish, gửi tarball `token-design-studio-skill-0.3.1.tgz` cho người nhận:
+Trước khi publish, gửi tarball `token-design-studio-skill-0.3.2.tgz` cho người nhận:
 
 ```sh
-npm exec --yes --package=./token-design-studio-skill-0.3.1.tgz -- token-design-studio-skill install --client codex
-npm exec --yes --package=./token-design-studio-skill-0.3.1.tgz -- token-design-studio-skill install --client antigravity
+npm exec --yes --package=./token-design-studio-skill-0.3.2.tgz -- token-design-studio-skill install --client codex
+npm exec --yes --package=./token-design-studio-skill-0.3.2.tgz -- token-design-studio-skill install --client antigravity
 ```
 
 Node 22.12+. Gói skill không tải editor/server hoặc dependency runtime bên ngoài, không sửa MCP. Codex dùng `CODEX_HOME` hoặc `~/.codex`; Antigravity **IDE/app** dùng `~/.gemini/config/skills` (khác Antigravity CLI). `--home PATH` chọn thư mục cấu hình client để cài vào môi trường riêng. File Codex `agents/openai.yaml` không được cài sang Antigravity. Mở phiên client mới sau khi cài.

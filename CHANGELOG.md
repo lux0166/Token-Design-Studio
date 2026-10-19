@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+- Add Koboyo as a source for confirmed hand-drawn icon/illustration directions, alongside the Icones default.
+- Document verified asset pages/slugs, consistent drawing styles, local SVG integration and Koboyo-specific license limits.
+- Deliver workflow 1.3.2 through the skill and MCP, with no bundled Koboyo assets, picker or new runtime dependency.
+
 ## 0.3.1
 
 - Prioritize Icones for new icon discovery; preserve existing families for scoped refinements.

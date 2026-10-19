@@ -33,6 +33,7 @@ Information priority and section → user task/decision map:
 Typography / spacing / color / shape sources:
 Component/block map and provenance:
 Icon family / verified IDs / source / license or notices / integration (when icons change):
+For Koboyo assets: verified page/slug / drawing style / local file / intended role / license conditions and check date:
 Interactive states and data integration:
 
 Acceptance criteria:

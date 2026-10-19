@@ -38,12 +38,14 @@ test('real HTTP and stdio MCP share disk-backed editor state; guards, locks, con
   const workflow = JSON.parse((await call('get_workflow', { mode: 'replicate' })).data);
   assert.equal(workflow.mode, 'replicate');
   assert.equal(workflow.phases.length, 7);
-  assert.equal(workflow.version, '1.3.1');
+  assert.equal(workflow.version, '1.3.2');
   assert.ok(workflow.phases.some((phase: { id: string }) => phase.id === 'interview'));
   assert.match(workflow.interviewGuide, /SPEC.md/);
   assert.match(client.getInstructions() || '', /https:\/\/icones.js.org\//);
+  assert.match(client.getInstructions() || '', /https:\/\/koboyo.com\/icons/);
   assert.equal(workflow.reuseGuide, readFileSync(resolve('skills/token-studio-shadcn/references/reuse.md'), 'utf8'));
   assert.match(workflow.reuseGuide, /https:\/\/icones.js.org\//);
+  assert.match(workflow.reuseGuide, /https:\/\/koboyo.com\/icons\/license/);
   const reuseResource = await client.readResource({ uri: workflow.resources.reuse });
   assert.ok('text' in reuseResource.contents[0]);
   assert.equal(reuseResource.contents[0].text, workflow.reuseGuide);
