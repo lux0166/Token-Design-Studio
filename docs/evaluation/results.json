@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-16",
+  "method": "Constrained headless single-sample generation with supplied guide context; evaluator browser checks are separate from agent claims. Not native IDE/app skill discovery or a shadcn integration benchmark.",
+  "codexVersion": "codex-cli 0.163.0-alpha.10.2",
+  "model": "Client defaults; model IDs not reported by these captured responses. No model overrides used.",
+  "sessions": [
+    {
+      "client": "codex",
+      "workflow": "1.2.0",
+      "case": "english-operations",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 164511,
+      "promptSha256": "168d0329cf696faa9906c70215f371d1861575ac6762d778a80bb8bc9e36ed03",
+      "reason": null
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.2.0",
+      "case": "english-operations",
+      "status": "blocked",
+      "elapsedMs": 189897,
+      "promptSha256": null,
+      "reason": "Unterminated string in JSON at position 26253 (line 2 column 26252)"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.2.0",
+      "case": "reference-schedule",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 98270,
+      "promptSha256": "e2418f538c0efe9d8cdcefd679df6c1682e6844df5d81656b4c38bc76e998a45",
+      "reason": null
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.2.0",
+      "case": "reference-schedule",
+      "status": "blocked",
+      "elapsedMs": 187483,
+      "promptSha256": null,
+      "reason": "Unterminated string in JSON at position 20672 (line 2 column 20671)"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.0",
+      "case": "english-operations",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 138965,
+      "promptSha256": "c827fb62890c18770e2411e13ad4294d2c5de888d3344007b76a4a333ad0fbf5",
+      "reason": null
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.0",
+      "case": "reference-schedule",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 79802,
+      "promptSha256": "d044d2eec72a014cad8225327e5f29806b128ab41b75875e448e3399cc3d4871",
+      "reason": null
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.0",
+      "case": "english-operations",
+      "status": "generated-awaiting-render-review",
+      "elapsedMs": 186490,
+      "promptSha256": "c827fb62890c18770e2411e13ad4294d2c5de888d3344007b76a4a333ad0fbf5",
+      "reason": null
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.0",
+      "case": "reference-schedule",
+      "status": "blocked",
+      "elapsedMs": 186948,
+      "promptSha256": null,
+      "reason": "Unterminated string in JSON at position 21097 (line 2 column 21096)"
+    }
+  ],
+  "observations": [
+    {
+      "client": "codex",
+      "workflow": "1.2.0",
+      "case": "english-operations",
+      "primaryAction": "Lesson details dialog opened with learner, teacher and time.",
+      "mobile": {
+        "clientWidth": 390,
+        "scrollWidth": 587
+      },
+      "finding": "Document overflows horizontally at 390px; retain as an observed baseline defect, not repaired in the evaluated output."
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.0",
+      "case": "english-operations",
+      "primaryAction": "Lesson details dialog opened with learner, teacher, time, level and local simulation disclosure.",
+      "mobile": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "finding": "No horizontal overflow in this viewport; not an overall aesthetic certification."
+    },
+    {
+      "client": "codex",
+      "workflow": "1.2.0",
+      "case": "reference-schedule",
+      "primaryAction": "Search for Bình reduced table to one lesson; details opened.",
+      "desktop": {
+        "viewport": 1280,
+        "sidebar": 220,
+        "header": 64,
+        "headingSize": "28px",
+        "headingWeight": 600
+      },
+      "mobile": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.0",
+      "case": "reference-schedule",
+      "primaryAction": "Conflict filter reduced table to one lesson; details opened.",
+      "desktop": {
+        "viewport": 1280,
+        "sidebar": 220,
+        "header": 64,
+        "headingSize": "28px",
+        "headingWeight": 600
+      },
+      "mobile": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      }
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.0",
+      "case": "english-operations",
+      "primaryAction": "Next-lesson details opened.",
+      "mobile": {
+        "clientWidth": 390,
+        "scrollWidth": 390
+      },
+      "finding": "An automatic teacher replacement action introduces an unconfirmed business rule; visible &bull; text remains in profile/dialog labels. These prototype findings are not changes to apps/english-one."
+    }
+  ],
+  "behavior": {
+    "cases": [
+      {
+        "id": "direction",
+        "nextResponse": "Bạn chọn hướng nào: (A) trang nhã, nhiều khoảng trắng và chữ lớn để làm rõ chuyên môn; hay (B) gần gũi, màu ấm và bố cục dẫn từng bước để người xem dễ đặt lịch? Tôi sẽ chờ lựa chọn trước khi triển khai giao diện.",
+        "implementNow": false,
+        "completeNow": false,
+        "reason": "Hướng thị giác còn chưa được xác nhận hoặc ủy quyền."
+      },
+      {
+        "id": "grill",
+        "nextResponse": "Học viên đặt lịch với giáo viên như thế nào, và được hủy hoặc đổi lịch trước giờ học bao lâu? Nếu hủy muộn hoặc vắng mặt thì buổi học được tính ra sao? Tôi sẽ dùng câu trả lời để hoàn thiện đặc tả; chế độ grill-me dừng trước phần triển khai.",
+        "implementNow": false,
+        "completeNow": false,
+        "reason": "Quy tắc lịch học và hủy lịch là quyết định nghiệp vụ quan trọng còn thiếu."
+      },
+      {
+        "id": "token",
+        "nextResponse": "Bước tiếp theo là đọc lại hệ thống để lấy revision mới nhất, cập nhật riêng radius từ 8px lên 10px, rồi kiểm tra giá trị và ghi lại thay đổi cùng bàn giao. Không cần hỏi thêm về thiết kế.",
+        "implementNow": true,
+        "completeNow": false,
+        "reason": "Thay đổi đã được cho phép và đủ rõ; chỉ hoàn tất sau khi cập nhật và kiểm tra có bằng chứng."
+      },
+      {
+        "id": "browser",
+        "nextResponse": "Mã đã build thành công, nhưng chưa thể xác minh giao diện vì thiếu truy cập trình duyệt và ảnh chụp thực tế. Tôi sẽ ghi kiểm tra render là bị chặn, tiếp tục các kiểm tra độc lập có thể làm và để tác vụ chưa hoàn tất cho đến khi có bằng chứng render.",
+        "implementNow": false,
+        "completeNow": false,
+        "reason": "Build thành công không thay thế điều kiện nghiệm thu render bắt buộc."
+      }
+    ]
+  }
+}

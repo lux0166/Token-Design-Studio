@@ -1,0 +1,59 @@
+{
+  "date": "2026-10-19",
+  "artifacts": [
+    {
+      "name": "token-design-studio-0.2.1.tgz",
+      "bytes": 439679,
+      "sha256": "ffd5586acf5e9c7f1de8c14e4dbad29cac43e16a4228c862c83f8c2ab7f42405"
+    },
+    {
+      "name": "token-design-studio-0.3.0.tgz",
+      "bytes": 550885,
+      "sha256": "1dc9ef3936f444eeca266f6bac38d7c4d99d72754cddea9150c53ed917b1cd11"
+    },
+    {
+      "name": "token-design-studio-skill-0.3.0.tgz",
+      "bytes": 127389,
+      "sha256": "2fdc1ebf7c1f3b5acb335d3c5db57f8b0672e6942cc840a0de640eb1026ed515"
+    },
+    {
+      "name": "token-design-studio-0.3.1.tgz",
+      "bytes": 552519,
+      "sha256": "85ad4f1a0abcc3a1cf3a5f6690479f913f7d2557b6d8ac80bfc210a31b967361"
+    },
+    {
+      "name": "token-design-studio-skill-0.3.1.tgz",
+      "bytes": 128529,
+      "sha256": "31b1199d8540d470a97c269e3f66490eaea98716033b1de8e3c4b6f5eb2b2838"
+    },
+    {
+      "name": "token-design-studio-0.3.2.tgz",
+      "bytes": 554040,
+      "sha256": "ed1a73bbde11742fbcf9215739259fe44887ae356009f7141446b42fe3c40965"
+    },
+    {
+      "name": "token-design-studio-skill-0.3.2.tgz",
+      "bytes": 129712,
+      "sha256": "3bb670133dee332ec3dad32d3633fa1cb12bc3cbe8846984ecfe82a3d7b3227c"
+    },
+    {
+      "name": "token-design-studio-0.4.0.tgz",
+      "bytes": 576815,
+      "sha256": "2bdd6d4b9f1dadbe990faf7e746cc96aa3cffcc9d37726bdb6ef6c1d8e80a357",
+      "acceptance": "pending-native-evaluation"
+    },
+    {
+      "name": "token-design-studio-skill-0.4.0.tgz",
+      "bytes": 140112,
+      "sha256": "6409e88aefb69d29c37c8004fb11b2ec950334d9cb19163dcd44207ffe21ad09",
+      "acceptance": "pending-native-evaluation"
+    },
+    {
+      "name": "token-studio-shadcn-0.4.0.skill",
+      "path": "output/skills/token-studio-shadcn-0.4.0.skill",
+      "bytes": 130721,
+      "sha256": "3633790c9fb4af39bb9e077d1ab88f43f72849b1560ae67dd96b76a46d2bfc4d",
+      "acceptance": "pending-native-evaluation"
+    }
+  ]
+}

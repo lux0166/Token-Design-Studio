@@ -1,17 +1,17 @@
 import { parseArgs } from 'node:util';
 import { spawn } from 'node:child_process';
 import { resolve, join, dirname } from 'node:path';
-import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, mkdirSync, writeFileSync, realpathSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import lockfile from 'proper-lockfile';
 import { packageRoot, metadata, defaultDataDirectory, codexHome } from './paths.mjs';
-import { installSkill } from './skill.mjs';
+import { installSkill, planSkill } from './skill.mjs';
 import { setupCodex } from './codex.mjs';
 
 const help = `Token Design Studio ${metadata.version}
   token-design-studio [start] [--port 4318] [--data-dir PATH] [--no-open]
   token-design-studio setup codex [--port 4318] [--replace-mcp]
-  token-design-studio install-skill
+  token-design-studio install-skill [--adopt-known]
   token-design-studio mcp [--port 4318]
   token-design-studio doctor [--port 4318] [--data-dir PATH]
   token-design-studio migrate FILE [--data-dir PATH]
@@ -34,7 +34,10 @@ function openBrowser(url) {
   const child = spawn(command, args, { stdio: 'ignore', detached: true, windowsHide: true });
   child.on('error', () => console.error(`Mở trình duyệt tại ${url}`)); child.unref();
 }
-const normalized = path => process.platform === 'win32' ? resolve(path).toLowerCase() : resolve(path);
+const normalized = path => {
+  const canonical = existsSync(path) ? realpathSync(path) : resolve(path);
+  return process.platform === 'win32' ? canonical.toLowerCase() : canonical;
+};
 const portInUse = port => new Promise(done => {
   const socket = createConnection({ host: '127.0.0.1', port });
   const finish = value => { socket.destroy(); done(value); };
@@ -43,16 +46,16 @@ const portInUse = port => new Promise(done => {
 export async function main(args = process.argv.slice(2)) {
   const [major, minor] = process.versions.node.split('.').map(Number);
   if (major < 22 || (major === 22 && minor < 12)) throw new Error('Yêu cầu Node.js 22.12 trở lên.');
-  const { values, positionals } = parseArgs({ args, allowPositionals: true, options: { help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' }, port: { type: 'string' }, 'data-dir': { type: 'string' }, 'no-open': { type: 'boolean' }, 'replace-mcp': { type: 'boolean' } } });
+  const { values, positionals } = parseArgs({ args, allowPositionals: true, options: { help: { type: 'boolean', short: 'h' }, version: { type: 'boolean', short: 'v' }, port: { type: 'string' }, 'data-dir': { type: 'string' }, 'no-open': { type: 'boolean' }, 'replace-mcp': { type: 'boolean' }, 'adopt-known': {type:'boolean'} } });
   if (values.help) { console.log(help); return; }
   if (values.version) { console.log(metadata.version); return; }
   const command = positionals[0] || 'start';
+  if (command === 'install-skill' && positionals.length === 1) { console.log(JSON.stringify(installSkill(planSkill(undefined,{adoptKnown:!!values['adopt-known']})), null, 2)); return; }
   const port = Number(values.port || process.env.PORT || 4318);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Port phải là số nguyên từ 1 đến 65535.');
   const dataDir = resolve(values['data-dir'] || defaultDataDirectory());
   const dataFile = resolve(values['data-dir'] ? join(dataDir, 'studio.json') : process.env.STUDIO_DATA_FILE || join(dataDir, 'studio.json'));
   const url = `http://127.0.0.1:${port}`;
-  if (command === 'install-skill' && positionals.length === 1) { console.log(JSON.stringify(installSkill(), null, 2)); return; }
   if (command === 'setup' && positionals.length === 2 && positionals[1] === 'codex') { console.log(JSON.stringify(setupCodex(port, values['replace-mcp']), null, 2)); console.log('Mở phiên Codex mới. Chạy Token Design Studio trước khi dùng MCP.'); return; }
   if (command === 'doctor' && positionals.length === 1) { console.log(JSON.stringify({ version: metadata.version, node: process.version, dataFile, codexHome: codexHome(), server: await probe(port) }, null, 2)); return; }
   if (command === 'migrate' && positionals.length === 2) {

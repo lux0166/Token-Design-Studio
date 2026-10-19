@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "guides": [
+    {
+      "version": "1.3.2",
+      "sha256": "48666d584357b45e21cf42e13455559362900514eb4aa66621ea6627d4ba3833"
+    },
+    {
+      "version": "1.4.0",
+      "sha256": "f4405645c56be855dc6ef37a1b1cbebb64374b01b9bd2fd09d518e049bc8ffd7"
+    }
+  ],
+  "runs": [
+    {
+      "client": "codex",
+      "workflow": "1.3.2",
+      "case": "english-operations",
+      "surface": "native IDE/app",
+      "status": "running",
+      "promptSha256": "90cd23498cddc738f61a89ce4833eec940086866b7fc018dda5ae111e6dbc677",
+      "prompt": "output/evaluations/040/native/codex-1.3.2-english-operations.md",
+      "threadId": "01a1531f-20aa-77f1-b19d-f379a78be3d2"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.3.2",
+      "case": "reference-schedule",
+      "surface": "native IDE/app",
+      "status": "running",
+      "promptSha256": "0ee84d066fa8c152b29bd47c60ca7cb4792600de99c23dd91f9cacf132ea326f",
+      "prompt": "output/evaluations/040/native/codex-1.3.2-reference-schedule.md",
+      "threadId": "01a1531f-30d1-7b42-b4fc-14d849e7bba6"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.4.0",
+      "case": "english-operations",
+      "surface": "native IDE/app",
+      "status": "running",
+      "promptSha256": "10c333bbf56275e02502f4de6f58812965d4f16036650787a07318b92996591c",
+      "prompt": "output/evaluations/040/native/codex-1.4.0-english-operations.md",
+      "threadId": "01a1531f-51e0-75d3-980b-1f4539b9f40e"
+    },
+    {
+      "client": "codex",
+      "workflow": "1.4.0",
+      "case": "reference-schedule",
+      "surface": "native IDE/app",
+      "status": "running",
+      "promptSha256": "aa5a23002597d5f696e1b5467c67ce2741155c7ce5bb41589a761b712154522a",
+      "prompt": "output/evaluations/040/native/codex-1.4.0-reference-schedule.md",
+      "threadId": "01a1531f-76f4-7d62-959b-ed79bda9b13f"
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.2",
+      "case": "english-operations",
+      "surface": "native IDE/app",
+      "status": "pending",
+      "promptSha256": "90cd23498cddc738f61a89ce4833eec940086866b7fc018dda5ae111e6dbc677",
+      "prompt": "output/evaluations/040/native/antigravity-1.3.2-english-operations.md"
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.3.2",
+      "case": "reference-schedule",
+      "surface": "native IDE/app",
+      "status": "pending",
+      "promptSha256": "0ee84d066fa8c152b29bd47c60ca7cb4792600de99c23dd91f9cacf132ea326f",
+      "prompt": "output/evaluations/040/native/antigravity-1.3.2-reference-schedule.md"
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.4.0",
+      "case": "english-operations",
+      "surface": "native IDE/app",
+      "status": "pending",
+      "promptSha256": "10c333bbf56275e02502f4de6f58812965d4f16036650787a07318b92996591c",
+      "prompt": "output/evaluations/040/native/antigravity-1.4.0-english-operations.md"
+    },
+    {
+      "client": "antigravity",
+      "workflow": "1.4.0",
+      "case": "reference-schedule",
+      "surface": "native IDE/app",
+      "status": "pending",
+      "promptSha256": "aa5a23002597d5f696e1b5467c67ce2741155c7ce5bb41589a761b712154522a",
+      "prompt": "output/evaluations/040/native/antigravity-1.4.0-reference-schedule.md"
+    }
+  ]
+}

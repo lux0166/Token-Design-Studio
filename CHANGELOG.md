@@ -1,0 +1,41 @@
+# Changelog
+
+## 0.4.0 — implementation; native-client acceptance tracked separately
+
+- Add v2 criterion/decision/check/artifact traceability and local report binding.
+- Add scoped plan/implementation SHA-256 snapshots, local file verification and safe v1 upgrade.
+- Preserve completed legacy records and back up the store on format migration.
+- Support local-ui refinements and token notes without screen paperwork.
+- Add installer doctor and explicit known-baseline adoption, preserving custom files and transaction recovery.
+- Keep the 17 MCP tools, legacy inputs and theme revisions; update HTTP/UI/prompts/resources and shared skill.
+- See docs/releases/0.4.0.md for actual validation and remaining client/benchmark gates; no npm publication or GitHub merge.
+
+## 0.3.2
+
+- Add Koboyo as a source for confirmed hand-drawn icon/illustration directions, alongside the Icones default.
+- Document verified asset pages/slugs, consistent drawing styles, local SVG integration and Koboyo-specific license limits.
+- Deliver workflow 1.3.2 through the skill and MCP, with no bundled Koboyo assets, picker or new runtime dependency.
+
+## 0.3.1
+
+- Prioritize Icones for new icon discovery; preserve existing families for scoped refinements.
+- Require verified icon IDs, collection-specific licenses, consistent visual treatment and proportionate provenance.
+- Deliver workflow 1.3.1 through the source skill, MCP instructions/resources/prompts and both installer packages.
+- Preserve existing runtime integrations; no icon dependency added or npm publication performed.
+
+## 0.3.0
+
+- Track project design dossiers through six additive task MCP tools, HTTP endpoints and the Vietnamese task workspace.
+- Gate completion using mode-specific reported evidence; preserve incomplete work, refuse stale writes and reopen changed records.
+- Store tasks separately from themes with independent revisions and a writer lock.
+- Ship workflow 1.3.0, JSON schema/template and an offline dossier validator.
+- Add the small token-design-studio-skill package for Codex and Antigravity IDE/app, with no external runtime dependencies or automatic MCP setup.
+- See docs/releases/0.3.0.md and docs/evaluation/REPORT.md for verification and client evaluation limits. No npm publication performed.
+
+## 0.2.1
+
+- Replace file-by-file skill installation with a staged, locked, backed-up transaction and interrupted-install recovery.
+- Revalidate destination edits, detect path conflicts and preserve unmanaged files.
+- Compensate failed Codex setup, create missing CODEX_HOME, retain concurrent config edits and bound external calls.
+- Make install-skill independent of PORT and a running server.
+- Add seven transaction regressions and cross-platform/minimum-Node CI configuration.

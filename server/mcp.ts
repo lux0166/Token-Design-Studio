@@ -3,7 +3,10 @@ import { z } from 'zod';
 import { patchSchema, type SystemPatch } from '../shared/model.js';
 import { agentInstructions, workflowModes, workflowResources } from '../shared/workflow.js';
 import { getWorkflow, workflowPrompt } from './workflow.js';
+import { StoreError } from './store.js';
 import { appVersion } from './version.js';
+import { taskInputSchema, acceptedTaskSchema } from '../shared/tasks.js';
+import type { TaskStore } from './tasks.js';
 import { themeCatalog, getCatalogTheme, filterThemes, catalogSource } from '../shared/themes.js';
 
 export interface AgentOperations {
@@ -16,24 +19,32 @@ export interface AgentOperations {
   contrast(id: string, mode: 'light' | 'dark'): unknown | Promise<unknown>;
   import(id: string, css: string, apply: boolean, expectedRevision?: number): unknown | Promise<unknown>;
 }
-export function createMcpServer(ops: AgentOperations, log?: (tool: string, ok: boolean, detail: string) => void) {
+export function createMcpServer(ops: AgentOperations, tasks: TaskStore, log?: (tool: string, ok: boolean, detail: string) => void) {
   const server = new McpServer({ name: 'token-studio', version: appVersion }, {
     instructions: agentInstructions,
   });
   const wrap = (name: string, fn: (args: any) => unknown | Promise<unknown>) => async (args: any) => {
     try {
       const result = await fn(args);
-      log?.(name, true, typeof args.systemId === 'string' ? args.systemId : 'Workspace');
+      log?.(name, true, args.systemId ?? args.taskId ?? 'Workspace');
       return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       log?.(name, false, message);
-      return { content: [{ type: 'text' as const, text: message }], isError: true };
+      return { content: [{ type: 'text' as const, text: error instanceof StoreError && error.details ? JSON.stringify({error:message,details:error.details}) : message }], isError: true };
     }
   };
   const read = { readOnlyHint: true, destructiveHint: false, openWorldHint: false };
   const write = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
   const id = z.string().uuid().describe('ID from list_systems');
+  const taskId = z.string().uuid().describe('ID from create_task/list_tasks');
+  const revision = z.number().int().min(0);
+  server.registerTool('create_task', { description: 'Sync a project task dossier into Studio. Incomplete records are allowed. Files stay in the project; this server never reads their paths. Optional taskId preserves an offline UUID.', inputSchema: { task: acceptedTaskSchema, taskId: taskId.optional() }, annotations: write }, wrap('create_task', a => tasks.create(a.task, a.taskId)));
+  server.registerTool('list_tasks', { description: 'List synced design tasks, status and per-task revisions.', annotations: read }, wrap('list_tasks', () => tasks.list()));
+  server.registerTool('get_task', { description: 'Read the latest dossier and per-task revision before replacing or completing it.', inputSchema: { taskId }, annotations: read }, wrap('get_task', a => tasks.get(a.taskId)));
+  server.registerTool('update_task', { description: 'Replace the synced task content with the project source of truth. Requires latest per-task revision; reopens completed tasks. Does not read or write project files.', inputSchema: { taskId, task: acceptedTaskSchema, expectedRevision: revision }, annotations: write }, wrap('update_task', a => tasks.update(a.taskId, a.task, a.expectedRevision)));
+  server.registerTool('validate_task', { description: 'Read missing completion requirements without changing status. Checks reported records, not screenshot authenticity or beauty.', inputSchema: { taskId }, annotations: read }, wrap('validate_task', a => tasks.validate(a.taskId)));
+  server.registerTool('complete_task', { description: 'Mark a task complete only when mode-specific evidence is recorded and required checks and substantive repairs pass. Rejects missing requirements; cannot prevent coding outside Studio.', inputSchema: { taskId, expectedRevision: revision }, annotations: write }, wrap('complete_task', a => tasks.complete(a.taskId, a.expectedRevision)));
   server.registerTool('get_workflow', {
     description: 'Start here for shadcn/ui tasks: get adaptive interview, specification, design direction, component reuse, mandatory plan/render self-review, build, verification and handoff guides. Use mode=grill-me for interview-to-spec only. Returns instructions; does not run an interview or enforce design quality.',
     inputSchema: { mode: z.enum(workflowModes).default('design-and-build') }, annotations: read,
@@ -50,12 +61,14 @@ export function createMcpServer(ops: AgentOperations, log?: (tool: string, ok: b
   server.registerTool('import_css', { description: 'Parse shadcn CSS (HEX, RGB, HSL, OKLCH); preview first with apply=false. Applying is atomic and respects locks. Requires latest expectedRevision when apply=true.', inputSchema: { systemId: id, css: z.string().min(1).max(200000), apply: z.boolean().default(false), expectedRevision: z.number().int().min(0).optional() }, annotations: write }, wrap('import_css', a => ops.import(a.systemId, a.css, a.apply, a.expectedRevision)));
   server.registerResource('workspace', 'token-studio://workspace', { description: 'Design system names and current revision', mimeType: 'application/json' }, async uri => ({ contents: [{ uri: uri.href, text: JSON.stringify(await ops.list()), mimeType: 'application/json' }] }));
   server.registerResource('theme-library', 'token-studio://themes', { description: 'Bundled theme IDs and sources. Read get_theme for a full snapshot.', mimeType: 'application/json' }, async uri => ({ contents: [{ uri: uri.href, text: JSON.stringify(themeCatalog.map(({id,name,source}) => ({id,name,source}))), mimeType: 'application/json' }] }));
+  server.registerResource('task-schema', 'token-studio://tasks/schema', { description: 'Version 2 task content schema (legacy v1 accepted by task tools); files remain in the project.', mimeType: 'application/json' }, async uri => ({ contents: [{ uri: uri.href, text: JSON.stringify(z.toJSONSchema(taskInputSchema)), mimeType: 'application/json' }] }));
   const guide = getWorkflow();
   for (const [name, uri, text] of [
     ['design-workflow', workflowResources.instructions, guide.instructions],
     ['interview-to-spec', workflowResources.interview, guide.interviewGuide],
     ['component-reuse', workflowResources.reuse, guide.reuseGuide],
     ['design-quality', workflowResources.designQuality, guide.designQualityGuide],
+    ['task-evidence', workflowResources.tasks, guide.taskGuide],
     ['delivery-evidence', workflowResources.handoff, guide.handoffTemplate],
   ]) {
     server.registerResource(name, uri, { description: `Token Studio ${name} guide`, mimeType: 'text/markdown' }, async requested => ({ contents: [{ uri: requested.href, text, mimeType: 'text/markdown' }] }));

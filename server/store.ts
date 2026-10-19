@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { createSnapshot, snapshotOf, snapshotSchema, systemSchema, patchSchema, type DesignSystem, type Snapshot, type StudioState, type SystemPatch } from '../shared/model.js';
 
 export class StoreError extends Error {
-  constructor(message: string, public status = 400) { super(message); }
+  constructor(message: string, public status = 400, public details?: unknown) { super(message); }
 }
 export const diskSchema = z.object({ revision: z.number().int().min(0), systems: z.array(systemSchema).min(1).max(100), calls: z.array(z.object({ id: z.string(), tool: z.string(), at: z.string(), ok: z.boolean(), detail: z.string() })).max(100) });
 export class StudioStore {

@@ -1,12 +1,12 @@
-import { ArrowUpRight, Check, ChevronDown, Clock3, Database, Home, Layers, Link2, Palette, Plus, X } from 'lucide-react';
+import { ArrowUpRight, Check, ChevronDown, Clock3, Database, Home, Layers, Link2, Palette, Plus, X, ListChecks } from 'lucide-react';
 import type { DesignSystem } from '../../shared/model';
 import { IconButton } from './ui';
-export type Page = 'editor' | 'overview' | 'mcp' | 'history' | 'themes';
+export type Page = 'editor' | 'overview' | 'mcp' | 'history' | 'themes' | 'tasks';
 export function Sidebar({ page, onPage, systems, selectedId, onSelect, onCreate, online, mobileOpen, onClose }: {
   page: Page; onPage: (page: Page) => void; systems: DesignSystem[]; selectedId: string; onSelect: (id: string) => void;
   onCreate: () => void; online: boolean; mobileOpen: boolean; onClose: () => void;
 }) {
-  const nav = [{ id: 'overview', label: 'Tổng quan', icon: Home }, { id: 'editor', label: 'Design system', icon: Layers }, { id: 'themes', label: 'Thư viện theme', icon: Palette }, { id: 'mcp', label: 'Kết nối MCP', icon: Link2 }, { id: 'history', label: 'Lịch sử', icon: Clock3 }] as const;
+  const nav = [{ id: 'overview', label: 'Tổng quan', icon: Home }, { id: 'editor', label: 'Design system', icon: Layers }, { id: 'themes', label: 'Thư viện theme', icon: Palette }, { id: 'tasks', label: 'Tác vụ thiết kế', icon: ListChecks }, { id: 'mcp', label: 'Kết nối MCP', icon: Link2 }, { id: 'history', label: 'Lịch sử', icon: Clock3 }] as const;
   return <>
     {mobileOpen && <button className="sidebar-scrim" aria-label="Đóng menu" onClick={onClose} />}
     <aside className={`sidebar ${mobileOpen ? 'is-open' : ''}`}>

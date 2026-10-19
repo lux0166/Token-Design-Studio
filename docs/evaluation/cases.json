@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "english-operations",
+      "task": "Build a responsive Vietnamese dashboard for an English 1-to-1 center. Confirmed fixture direction: white/green existing brand, calm, readable operations view. Actors: center administrator and teacher. Primary task: find the next lesson, open its details and see student learning progress. Show today's schedule with teacher, learner, time, level and explicit conflict state; a learner profile with goal and recent progress; primary action is opening the lesson. Use clearly labeled synthetic data. No revenue tiles, testimonials, payment integration or cloud. A local working prototype is the authorized scope. Preserve the supplied direction; no new interview is needed for these fixture answers.",
+      "checks": ["Next lesson is identifiable", "Lesson detail action works", "Teacher/learner/time are present", "Synthetic progress has context", "Mobile hierarchy remains usable"]
+    },
+    {
+      "id": "reference-schedule",
+      "task": "Replicate the supplied reference geometry for a lesson scheduling view. The reference contract is 1280x900: white canvas, 220px left navigation with English 1:1 wordmark, 64px top bar, main area padding 32px, heading Lịch học hôm nay 28px/600, subtitle 14px, a single green Tạo lịch button aligned right, followed by a flat table with time, student, teacher, level, status and Chi tiết. Three synthetic lessons: 09:00 An / Emma / A2 / Sắp học; 10:00 Bình / James / B1 / Trùng lịch; 11:00 Chi / Emma / A1 / Sắp học. No decorative hero, KPI cards or gradients. Green #18794E, ink #0F172A, muted #64748B, border #E2E8F0, radius 8px, system sans. Mobile becomes labeled lesson rows with a reachable details action. Implement a local details dialog and filter. Reference is a text geometry fixture; do not claim image fidelity or a screenshot comparison without actual browser evidence.",
+      "checks": ["Reference content/order preserved", "No unrelated KPI cards", "Details dialog works", "Filter works", "Missing image fidelity evidence disclosed"]
+    }
+  ],
+  "behaviorCases": [
+    "New UI without brand/reference: ask for a real choice between two different directions; silence does not select.",
+    "Grill-me: finish with specification and unresolved intent; do not implement product code.",
+    "Token-only: use change/handoff/affected checks without a full screen dossier.",
+    "No browser: record a blocker for mandatory render checks; never fabricate a pass."
+  ]
+}

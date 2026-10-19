@@ -1,0 +1,21 @@
+{
+  "taskId": "6466b42b-c08b-447f-a3c8-079fd0dc7146",
+  "task": {
+    "schemaVersion": 1,
+    "title": "Đặc tả lịch học · ví dụ tổng hợp",
+    "goal": "Xác định các trường dữ liệu và tiêu chí nghiệm thu trước khi code.",
+    "project": "English 1–1 · fixture",
+    "mode": "grill-me",
+    "scope": "screen",
+    "decisions": [
+      { "id": "users", "question": "Ai dùng lịch học?", "answer": "Quản trị viên và giáo viên.", "material": true, "status": "resolved", "source": "project", "evidence": "Brief tổng hợp của fixture trong docs/examples/SPEC.md, không phải lời phỏng vấn người dùng thật." }
+    ],
+    "acceptanceCriteria": ["Đặc tả có actor, dữ liệu lịch học và tiêu chí nghiệm thu kiểm tra được."],
+    "artifacts": [
+      { "id": "spec", "kind": "spec", "path": "docs/examples/SPEC.md", "label": "Đặc tả fixture" }
+    ],
+    "checks": [],
+    "findings": [],
+    "limitations": []
+  }
+}

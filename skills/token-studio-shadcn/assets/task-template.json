@@ -1,0 +1,35 @@
+{
+  "task": {
+    "schemaVersion": 2,
+    "title": "Thay bằng tên tác vụ",
+    "goal": "Mục tiêu đã xác nhận",
+    "project": "Tên dự án",
+    "mode": "design-and-build",
+    "scope": "screen",
+    "decisions": [],
+    "direction": {
+      "source": "unresolved",
+      "summary": "",
+      "evidence": ""
+    },
+    "acceptanceCriteria": [],
+    "artifacts": [],
+    "checks": [],
+    "findings": [],
+    "limitations": [],
+    "notes": {
+      "scope": "",
+      "change": "",
+      "handoff": ""
+    },
+    "requirements": {
+      "contrast": false,
+      "render": false
+    },
+    "inputs": {
+      "plan": [],
+      "implementation": []
+    },
+    "snapshots": {}
+  }
+}
